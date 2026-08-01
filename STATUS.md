@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-01 14:33 UTC
+Last verified: 2026-08-01 17:39 UTC
 
 ## Remote state
 
@@ -88,7 +88,19 @@ latest evaluated timestamp was 2026-06-09 15:11:49 UTC.
 
 The nonlinear result is promising evidence of structured deployment-time selection, but it is not
 yet a profitable replica strategy. The creator-history family is retained, with the declining
-late-fold delta recorded as a risk. The next priority is preparing a bounded June outcome source
-for fee/slippage/0-1-2-slot backtesting without downloading the 429 GiB raw blocks. The first
-unweighted logistic run is preserved in the experiment ledger with an erratum rather than silently
-deleted.
+late-fold delta recorded as a risk. The first unweighted logistic run is preserved in the
+experiment ledger with an erratum rather than silently deleted.
+
+## June outcome-source audit
+
+The 2,840,322,917-byte June market-cap candle file is downloaded and SHA-256 verified as
+`99c0546bd1fae9ae26dc505151200af5bfdef01f5a04af8c0251e33c77b59400`. Its 60,109,034
+rows cover 764,451 tokens at one-second resolution. There are no nulls or duplicate
+`(token_address, resolution, candle_time_ms)` keys.
+
+The source is accepted only for outcome labels and coarse second-level sensitivity, with mandatory
+filters for 36 pre-deployment rows across 35 tokens and one invalid OHLC row. It is forbidden as an
+entry feature. Because it lacks block slot and transaction position, it cannot honestly provide
+the required exact 0/1/2-slot execution prices. The next priority is a metadata-only audit of the
+approximately 16.71 GiB June trade artifact; the 429 GiB raw blocks remain out of scope. No
+final-holdout result was evaluated.
