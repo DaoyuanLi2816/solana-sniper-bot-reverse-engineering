@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+reports/generated/*
+!reports/generated/.gitkeep
+experiments/runs/*
+!experiments/runs/.gitkeep
+*.tar
+*.tar.gz
+*.parquet
+*.jsonl.gz

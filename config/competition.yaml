@@ -1,0 +1,61 @@
+competition:
+  slug: solana-sniper-bot-reverse-engineering
+  url: https://www.kaggle.com/competitions/solana-sniper-bot-reverse-engineering
+  final_deadline_utc: 2026-08-14T21:00:00Z
+  prize_usd: 1000
+  prize_places: 1
+  prize_currency: USDC
+  prize_structure_status: conflicting_published_text
+  prize_structure_notes:
+    - Overview advertises one first-place prize of USD 1,000.
+    - Rules still contain sponsor placeholders and a USD 600/300/100 split.
+    - Host discussion confirms international eligibility and payout in USDC.
+  awards_points_or_medals: false
+  submission_type: kaggle_writeup
+
+submission_requirements:
+  maximum_team_size: 5
+  writeup_entries_per_team: 1
+  writeup_max_words: 3000
+  cover_image_required: true
+  public_notebook_required: true
+  public_repository_required: true
+  notebook_must_run_end_to_end: true
+  external_tools_and_llms_allowed: true
+  competition_data_redistribution_allowed: false
+
+hard_guards:
+  decision_time: token_deployment_time
+  forbid_post_decision_features: true
+  forbid_future_deployer_history: true
+  require_time_based_validation: true
+  require_delay_sensitivity_slots: [0, 1, 2]
+  require_reproducible_metrics: true
+  require_artifact_sha256: true
+  require_manifest_entry: true
+  pending_is_improvement: false
+
+evaluation_weights:
+  behavioral_analysis: 20
+  feature_reverse_engineering: 20
+  classification_quality: 15
+  replica_strategy_backtest: 20
+  competitor_comparison: 15
+  reproducibility_and_code_quality: 10
+
+data_sources:
+  wallet_base_url: http://154.12.118.112:48114
+  core_archive_url: http://65.21.203.147:48102/half_year_dataset.tar
+  wallet_files:
+    - 5brv79e_activity.parquet
+    - 5brv79e_activity_txs.jsonl.gz
+    - 5brv79e_activity_txs_index.parquet
+  optional_post_decision_sources:
+    - http://154.12.118.112:48112/pumpfun_trades.parquet
+    - http://154.12.118.112:48113/mcap_candles.parquet
+
+automation:
+  id: solana-sniper-bot
+  kind: heartbeat
+  cadence: every_3_hours
+  until_utc: 2026-08-15T00:00:00Z
