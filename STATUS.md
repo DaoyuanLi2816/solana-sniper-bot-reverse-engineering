@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-01 20:52 UTC
+Last verified: 2026-08-01 23:39 UTC
 
 ## Remote state
 
@@ -120,3 +120,19 @@ filter, although their price fields remain present.
 The next priority is a deterministic 0/1/2-slot entry-price table with explicit coverage and
 missingness, followed by train/validation backtesting with fees and drawdown. The 429 GiB raw blocks
 remain out of scope, and the final holdout remains sealed.
+
+## Exact-slot entry-price proxy
+
+A deterministic table now covers all 38,111 June classification tokens at requested delays 0, 1,
+and 2, producing 114,333 unique token-delay rows. Classification and trade deployment context
+matches exactly. Output SHA-256 is
+`8971bc3c210d6d8a7b98b21fd6a0a66eefcc2aaf5b4e8b2fd27c6221d9cdad83`.
+
+Coverage is 87.22%, 86.94%, and 86.34% for requested delays 0, 1, and 2. Only 13,836, 11,356,
+and 12,100 rows respectively execute on the exact target slot; the remaining covered rows use the
+first later observed trade. Median additional wait is one slot, but the p95 is 145, 154, and 176
+slots. Consequently, the table is retained as an observed-trade execution proxy, not evidence that
+every requested delay fills on time. Backtests must report actual delay and exact-target coverage.
+
+The next priority is a train/validation-only execution-policy comparison that preserves this
+coverage limitation, incorporates explicit fees, and still leaves the final holdout sealed.

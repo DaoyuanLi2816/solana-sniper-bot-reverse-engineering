@@ -45,6 +45,7 @@ uv run solana-audit-candles
 uv run solana-audit-trades-metadata
 uv run solana-download-trades
 uv run solana-audit-trades
+uv run solana-build-entry-prices
 uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
