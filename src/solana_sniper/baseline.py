@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 
 from solana_sniper.guardrails import assert_feature_names_are_pre_decision
 from solana_sniper.manifest import append_experiment, sha256_file
-from solana_sniper.paths import PROCESSED_DIR, REPORT_DIR
+from solana_sniper.paths import PROCESSED_DIR, REPORT_DIR, project_relative
 from solana_sniper.splits import chronological_train_validation_test_split
 
 NON_FEATURE_COLUMNS = {
@@ -32,10 +32,19 @@ NON_FEATURE_COLUMNS = {
     "blockSlot",
     "block_slot",
 }
+NEGATIVE_SAMPLE_WEIGHT = 25.0
 
 
-def _best_f1_threshold(labels: pd.Series, probabilities: np.ndarray) -> dict[str, float]:
-    precision, recall, thresholds = precision_recall_curve(labels, probabilities)
+def _population_weights(labels: pd.Series) -> np.ndarray:
+    return np.where(labels.to_numpy() == 0, NEGATIVE_SAMPLE_WEIGHT, 1.0)
+
+
+def _best_f1_threshold(
+    labels: pd.Series, probabilities: np.ndarray, sample_weight: np.ndarray
+) -> dict[str, float]:
+    precision, recall, thresholds = precision_recall_curve(
+        labels, probabilities, sample_weight=sample_weight
+    )
     f1 = 2 * precision * recall / np.maximum(precision + recall, 1e-12)
     index = int(np.nanargmax(f1[:-1]))
     return {
@@ -47,16 +56,29 @@ def _best_f1_threshold(labels: pd.Series, probabilities: np.ndarray) -> dict[str
 
 
 def _fixed_threshold_metrics(
-    labels: pd.Series, probabilities: np.ndarray, threshold: float
+    labels: pd.Series,
+    probabilities: np.ndarray,
+    threshold: float,
+    sample_weight: np.ndarray,
 ) -> dict[str, float]:
     predictions = probabilities >= threshold
     precision, recall, f1, _ = precision_recall_fscore_support(
-        labels, predictions, average="binary", zero_division=0
+        labels,
+        predictions,
+        average="binary",
+        zero_division=0,
+        sample_weight=sample_weight,
     )
     return {
-        "pr_auc": float(average_precision_score(labels, probabilities)),
-        "prevalence_baseline_pr_auc": float(labels.mean()),
-        "brier_score": float(brier_score_loss(labels, probabilities)),
+        "population_adjusted_pr_auc": float(
+            average_precision_score(labels, probabilities, sample_weight=sample_weight)
+        ),
+        "population_prevalence_baseline_pr_auc": float(
+            np.average(labels.to_numpy(), weights=sample_weight)
+        ),
+        "population_weighted_brier_score": float(
+            brier_score_loss(labels, probabilities, sample_weight=sample_weight)
+        ),
         "threshold": float(threshold),
         "precision": float(precision),
         "recall": float(recall),
@@ -111,11 +133,15 @@ def run_baseline(dataset_path: Path) -> dict[str, object]:
     )
     model.fit(split.train, split.train["label"])
     validation_probabilities = model.predict_proba(split.validation)[:, 1]
-    operating_point = _best_f1_threshold(split.validation["label"], validation_probabilities)
+    validation_weights = _population_weights(split.validation["label"])
+    operating_point = _best_f1_threshold(
+        split.validation["label"], validation_probabilities, validation_weights
+    )
     test_probabilities = model.predict_proba(split.test)[:, 1]
+    test_weights = _population_weights(split.test["label"])
     metrics = {
         "experiment": "logistic_predecision_baseline",
-        "dataset": str(dataset_path),
+        "dataset": project_relative(dataset_path),
         "dataset_sha256": sha256_file(dataset_path),
         "active_window_start": active_start.isoformat(),
         "active_window_end": active_end.isoformat(),
@@ -125,12 +151,26 @@ def run_baseline(dataset_path: Path) -> dict[str, object]:
         "train_end": split.train["decision_time"].max().isoformat(),
         "validation_end": split.validation["decision_time"].max().isoformat(),
         "validation_positive_rate": float(split.validation["label"].mean()),
-        "validation_pr_auc": float(
+        "negative_sample_weight": NEGATIVE_SAMPLE_WEIGHT,
+        "validation_sampled_pr_auc": float(
             average_precision_score(split.validation["label"], validation_probabilities)
         ),
-        "validation_selected_operating_point": operating_point,
+        "validation_population_adjusted_pr_auc": float(
+            average_precision_score(
+                split.validation["label"],
+                validation_probabilities,
+                sample_weight=validation_weights,
+            )
+        ),
+        "validation_population_adjusted_prevalence": float(
+            np.average(split.validation["label"].to_numpy(), weights=validation_weights)
+        ),
+        "validation_selected_population_operating_point": operating_point,
         "test_metrics_at_validation_threshold": _fixed_threshold_metrics(
-            split.test["label"], test_probabilities, operating_point["threshold"]
+            split.test["label"],
+            test_probabilities,
+            operating_point["threshold"],
+            test_weights,
         ),
         "feature_names": numeric_features,
     }
@@ -143,7 +183,7 @@ def main() -> None:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     output = REPORT_DIR / "baseline_metrics.json"
     output.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
-    append_experiment({**metrics, "metrics_path": str(output)})
+    append_experiment({**metrics, "metrics_path": project_relative(output)})
     print(json.dumps(metrics, indent=2))
 
 

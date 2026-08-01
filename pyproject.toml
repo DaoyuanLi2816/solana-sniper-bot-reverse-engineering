@@ -27,6 +27,7 @@ solana-extract-positive = "solana_sniper.extract_deploy_features:main"
 solana-entry-latency = "solana_sniper.entry_latency:main"
 solana-stream-negatives = "solana_sniper.stream_negative_sample:main"
 solana-run-baseline = "solana_sniper.baseline:main"
+solana-run-boosting = "solana_sniper.boosting:main"
 
 [build-system]
 requires = ["hatchling"]

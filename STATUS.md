@@ -28,7 +28,9 @@ Rules page. The competition data must not be redistributed outside eligible part
 - Audited 87,007 target-wallet activities and 16,163 bought tokens.
 - Extracted 15,927 positive deployment-time feature rows.
 - Matched every positive deployment to its first wallet buy.
-- Started a deterministic 1-in-25 sample across all 5,059,880 negative deployments.
+- Completed a deterministic 1-in-25 sample across all 5,059,880 negative deployments.
+- Built 202,395 negative deployment-time rows and a 218,322-row classification table.
+- Ran strict chronological train/validation/final-test comparisons with population weighting.
 - Created Codex heartbeat `solana-sniper-bot`, every three hours through the deadline.
 
 ## First behavioral findings
@@ -40,8 +42,17 @@ Rules page. The competition data must not be redistributed outside eligible part
 
 These are descriptive findings, not evidence that a classifier or replica strategy is competitive.
 
-## Current blocker
+## First model results
 
-The first classification baseline waits for the full time-spanning negative sample and index join.
-Do not substitute an early-window-only negative sample because absolute time would become a trivial,
-non-generalizing separator.
+All reported precision and PR-AUC values below weight each sampled negative as 25 deployments.
+The operating threshold was selected on validation and evaluated once on the later final test.
+
+- Population prevalence in the final test: 0.4597%.
+- Logistic baseline final PR-AUC: 0.01089 (2.37x prevalence); precision 1.66%, recall 16.0%.
+- Histogram gradient boosting final PR-AUC: 0.04547 (9.89x prevalence); precision 8.24%,
+  recall 14.3%.
+
+The nonlinear result is promising evidence of structured deployment-time selection, but it is not
+yet a profitable replica strategy. The next priority is strictly historical deployer features,
+followed by feature attribution and a fee/slippage/0-1-2-slot backtest. The first unweighted
+logistic run is preserved in the experiment ledger with an erratum rather than silently deleted.

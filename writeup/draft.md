@@ -53,6 +53,15 @@ Use chronological train, validation, and final holdout periods. Report PR-AUC, p
 F1, selected operating point, calibration, and stability by month. Accuracy and ROC-AUC are not
 primary metrics under the roughly 1:300 class imbalance.
 
+### Provisional deployment-transaction baseline
+
+We sampled every 25th not-bought deployment across the complete negative archive, then restored
+the population ratio through a 25x negative evaluation weight. A strict final time holdout has a
+0.4597% weighted prevalence. Logistic regression reaches 0.01089 PR-AUC, while changing only the
+model family to histogram gradient boosting reaches 0.04547 PR-AUC (9.89x prevalence). At the
+validation-selected threshold, the nonlinear model records 8.24% precision and 14.3% recall on
+the final period. These metrics establish selection signal; they do not establish trading profit.
+
 ## 3. Replica strategy and backtest
 
 - Define the score and entry threshold before inspecting the final holdout.

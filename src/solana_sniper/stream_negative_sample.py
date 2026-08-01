@@ -108,8 +108,10 @@ def join_index_and_features(stride: int) -> Path:
     output = PROCESSED_DIR / "negative_deploy_features.parquet"
     temporary = output.with_suffix(output.suffix + ".part")
     connection = duckdb.connect()
+    connection.read_parquet(str(raw_features)).create_view("sampled_raw_features")
+    connection.read_parquet(str(index)).create_view("negative_deploy_index")
     connection.execute(
-        """
+        f"""
         COPY (
             SELECT
                 i.tx_hash,
@@ -143,12 +145,12 @@ def join_index_and_features(stride: int) -> Path:
                 0 AS label,
                 hour(to_timestamp(f.decision_time)) AS decision_hour_utc,
                 dayofweek(to_timestamp(f.decision_time)) AS decision_weekday_utc
-            FROM read_parquet(?) AS f
-            INNER JOIN read_parquet(?) AS i USING (line_number)
-            WHERE i.line_number % ? = 0
+            FROM sampled_raw_features AS f
+            INNER JOIN negative_deploy_index AS i USING (line_number)
+            WHERE i.line_number % {int(stride)} = 0
         ) TO ? (FORMAT PARQUET, COMPRESSION ZSTD)
         """,
-        [str(raw_features), str(index), stride, str(temporary)],
+        [str(temporary)],
     )
     connection.close()
     temporary.replace(output)
@@ -161,10 +163,12 @@ def combine_classification_dataset() -> Path:
     output = PROCESSED_DIR / "classification_dataset.parquet"
     temporary = output.with_suffix(output.suffix + ".part")
     connection = duckdb.connect()
+    connection.read_parquet(str(positive)).create_view("positive_features")
+    connection.read_parquet(str(negative)).create_view("negative_features")
     connection.execute(
-        "COPY (SELECT * FROM read_parquet(?) UNION ALL BY NAME SELECT * FROM read_parquet(?)) "
+        "COPY (SELECT * FROM positive_features UNION ALL BY NAME SELECT * FROM negative_features) "
         "TO ? (FORMAT PARQUET, COMPRESSION ZSTD)",
-        [str(positive), str(negative), str(temporary)],
+        [str(temporary)],
     )
     connection.close()
     temporary.replace(output)

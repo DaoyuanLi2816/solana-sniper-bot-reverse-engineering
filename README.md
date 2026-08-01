@@ -17,20 +17,26 @@ outcomes are labels or backtest inputs only. They are never decision features.
 
 ## Layout
 
-- `config/competition.yaml` — live rules and campaign guardrails.
-- `data/raw/` — downloaded source files (ignored by Git).
-- `data/processed/` — deterministic derived tables (ignored by Git).
-- `experiments/manifest.jsonl` — append-only experiment ledger.
-- `reports/` — generated analysis, figures, and writeup material.
-- `src/solana_sniper/` — reusable data, validation, and modeling code.
-- `tests/` — leakage, split, schema, and metric checks.
+- `config/competition.yaml`: live rules and campaign guardrails.
+- `data/raw/`: downloaded source files (ignored by Git).
+- `data/processed/`: deterministic derived tables (ignored by Git).
+- `experiments/manifest.jsonl`: append-only experiment ledger.
+- `reports/`: generated analysis, figures, and writeup material.
+- `src/solana_sniper/`: reusable data, validation, and modeling code.
+- `tests/`: leakage, split, schema, and metric checks.
 
 ## Initial workflow
 
 ```powershell
 uv sync
 uv run solana-download-wallet
+uv run solana-stream-core
 uv run solana-audit-wallet
+uv run solana-extract-positive
+uv run solana-entry-latency
+uv run solana-stream-negatives
+uv run solana-run-baseline
+uv run solana-run-boosting
 uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
