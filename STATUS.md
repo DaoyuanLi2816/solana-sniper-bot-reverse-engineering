@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-01 17:39 UTC
+Last verified: 2026-08-01 20:52 UTC
 
 ## Remote state
 
@@ -101,6 +101,22 @@ rows cover 764,451 tokens at one-second resolution. There are no nulls or duplic
 The source is accepted only for outcome labels and coarse second-level sensitivity, with mandatory
 filters for 36 pre-deployment rows across 35 tokens and one invalid OHLC row. It is forbidden as an
 entry feature. Because it lacks block slot and transaction position, it cannot honestly provide
-the required exact 0/1/2-slot execution prices. The next priority is a metadata-only audit of the
-approximately 16.71 GiB June trade artifact; the 429 GiB raw blocks remain out of scope. No
-final-holdout result was evaluated.
+the required exact 0/1/2-slot execution prices by itself. No final-holdout result was evaluated.
+
+## June exact-slot trade source audit
+
+The 17,944,584,022-byte June trade file is downloaded and SHA-256 verified as
+`ac10521276d8678fe7d2ce56649512c4dc274babdf0abd4f2d7df81a3b3cc03c`. The full audit
+confirmed 133,978,933 rows, 767,195 tokens, zero duplicate event IDs, zero pre-deployment trades,
+and consistent per-token deployment context.
+
+The source contains block slot, transaction index, event index, deployment position, and USD/SOL
+price fields, so exact 0/1/2-slot price construction is supported. Post-deployment same-slot
+coverage is 891,400 trades across 250,787 tokens; slot+1 and slot+2 contain 382,126 and 382,781
+trades respectively. The 734,865 events from the deployment transaction itself must be excluded
+as non-replicable. Exactly 8,952 rows have null amount fields and require an explicit size/volume
+filter, although their price fields remain present.
+
+The next priority is a deterministic 0/1/2-slot entry-price table with explicit coverage and
+missingness, followed by train/validation backtesting with fees and drawdown. The 429 GiB raw blocks
+remain out of scope, and the final holdout remains sealed.

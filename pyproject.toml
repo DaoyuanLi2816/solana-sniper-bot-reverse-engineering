@@ -33,6 +33,9 @@ solana-run-creator-history = "solana_sniper.creator_history_experiment:main"
 solana-run-creator-stability = "solana_sniper.creator_history_stability:main"
 solana-download-candles = "solana_sniper.download_candles:main"
 solana-audit-candles = "solana_sniper.audit_candles:main"
+solana-audit-trades-metadata = "solana_sniper.audit_trades_metadata:main"
+solana-download-trades = "solana_sniper.download_trades:main"
+solana-audit-trades = "solana_sniper.audit_trades:main"
 
 [build-system]
 requires = ["hatchling"]

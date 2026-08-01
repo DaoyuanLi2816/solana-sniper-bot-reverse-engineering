@@ -42,6 +42,9 @@ uv run solana-run-creator-history
 uv run solana-run-creator-stability
 uv run solana-download-candles
 uv run solana-audit-candles
+uv run solana-audit-trades-metadata
+uv run solana-download-trades
+uv run solana-audit-trades
 uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
