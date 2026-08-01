@@ -70,6 +70,14 @@ hours versus 2.47 minutes since the prior deployment). The raw prior-deployment-
 similar (55 bought versus 56 not bought), suggesting cadence and wallet maturity matter more than
 simple deploy volume.
 
+The result is temporally stable rather than confined to one split. In three expanding validation
+windows, adding creator history changes population-adjusted PR-AUC by +0.02976, +0.02792, and
++0.01869. The shrinking late-window gain is a limitation, but all three deltas remain positive.
+Jointly permuting the creator feature family reduces standard-validation PR-AUC from 0.08934 to
+0.01735. Recency and observed wallet age cause the largest individual drops; correlated-feature
+permutation effects are not additive. All of these analyses end before the untouched final-test
+boundary.
+
 ## 3. Replica strategy and backtest
 
 - Define the score and entry threshold before inspecting the final holdout.

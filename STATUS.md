@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-01 11:29 UTC
+Last verified: 2026-08-01 14:33 UTC
 
 ## Remote state
 
@@ -70,7 +70,25 @@ During the validation window, bought tokens were less often a signer's first obs
 versus 2.47 minutes). This supports an interpretable preference for established, less immediately
 spammy deployers rather than raw deployment count alone.
 
+## Creator-history stability and attribution
+
+The same model and hyperparameters were compared with and without creator history in three
+expanding chronological folds ending before the final holdout. PR-AUC deltas were +0.02976,
++0.02792, and +0.01869: positive in 3/3 folds, with some late-period decay. The mean absolute
+delta was +0.02546.
+
+On the standard validation window, jointly permuting all four creator features reduced PR-AUC from
+0.08934 to 0.01735. The largest individual drops came from seconds since the previous deployment
+(0.05131) and observed creator age (0.04805), followed by prior deployment count (0.03487) and
+prior active-slot count (0.02047). Individual drops are not additive because these features are
+correlated.
+
+No prediction was generated at or after the final-test start of 2026-06-09 15:12:25 UTC; the
+latest evaluated timestamp was 2026-06-09 15:11:49 UTC.
+
 The nonlinear result is promising evidence of structured deployment-time selection, but it is not
-yet a profitable replica strategy. The next priority is creator-history attribution/stability,
-followed by fee/slippage/0-1-2-slot backtesting. The first unweighted logistic run is preserved in
-the experiment ledger with an erratum rather than silently deleted.
+yet a profitable replica strategy. The creator-history family is retained, with the declining
+late-fold delta recorded as a risk. The next priority is preparing a bounded June outcome source
+for fee/slippage/0-1-2-slot backtesting without downloading the 429 GiB raw blocks. The first
+unweighted logistic run is preserved in the experiment ledger with an erratum rather than silently
+deleted.
