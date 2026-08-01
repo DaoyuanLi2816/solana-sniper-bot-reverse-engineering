@@ -37,6 +37,8 @@ uv run solana-entry-latency
 uv run solana-stream-negatives
 uv run solana-run-baseline
 uv run solana-run-boosting
+uv run solana-build-creator-history
+uv run solana-run-creator-history
 uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .

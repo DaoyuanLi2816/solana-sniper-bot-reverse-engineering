@@ -62,6 +62,14 @@ model family to histogram gradient boosting reaches 0.04547 PR-AUC (9.89x preval
 validation-selected threshold, the nonlinear model records 8.24% precision and 14.3% recall on
 the final period. These metrics establish selection signal; they do not establish trading profit.
 
+Adding only strictly prior-slot deployment history for the deployment signer raises validation
+PR-AUC from 0.06197 to 0.08934 (+44.2%); the final test remains sealed. Bought tokens are less often
+from first-seen signers (9.61% versus 20.58%), while their signers have a longer observed history
+(90.1 versus 22.5 median days) and are less likely to have deployed again within minutes (2.36
+hours versus 2.47 minutes since the prior deployment). The raw prior-deployment-count medians are
+similar (55 bought versus 56 not bought), suggesting cadence and wallet maturity matter more than
+simple deploy volume.
+
 ## 3. Replica strategy and backtest
 
 - Define the score and entry threshold before inspecting the final holdout.

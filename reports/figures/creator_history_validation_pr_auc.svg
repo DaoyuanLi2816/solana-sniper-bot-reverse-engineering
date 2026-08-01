@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="350" viewBox="0 0 820 350" role="img" aria-labelledby="title desc">
+  <title id="title">Population-adjusted validation PR-AUC</title>
+  <desc id="desc">Creator history improves validation PR-AUC from 0.06197 to 0.08934; prevalence is 0.005665.</desc>
+  <rect width="820" height="350" fill="#ffffff"/>
+  <text x="40" y="42" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1f2937">Population-adjusted validation PR-AUC</text>
+  <text x="40" y="72" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Strict chronological validation; final test withheld</text>
+  <line x1="230" y1="95" x2="230" y2="300" stroke="#9ca3af" stroke-width="1"/>
+  <line x1="230" y1="300" x2="770" y2="300" stroke="#9ca3af" stroke-width="1"/>
+  <text x="35" y="132" font-family="Arial, sans-serif" font-size="16" fill="#374151">Population prevalence</text>
+  <rect x="230" y="108" width="31" height="36" rx="3" fill="#9ca3af"/>
+  <text x="270" y="133" font-family="Arial, sans-serif" font-size="15" fill="#111827">0.00567</text>
+  <text x="35" y="202" font-family="Arial, sans-serif" font-size="16" fill="#374151">Transaction features</text>
+  <rect x="230" y="178" width="335" height="36" rx="3" fill="#60a5fa"/>
+  <text x="575" y="203" font-family="Arial, sans-serif" font-size="15" fill="#111827">0.06197</text>
+  <text x="35" y="272" font-family="Arial, sans-serif" font-size="16" fill="#374151">+ creator history</text>
+  <rect x="230" y="248" width="482" height="36" rx="3" fill="#10b981"/>
+  <text x="722" y="273" font-family="Arial, sans-serif" font-size="15" fill="#111827">0.08934</text>
+  <text x="640" y="326" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#047857">+44.2%</text>
+</svg>
