@@ -30,6 +30,7 @@ solana-run-baseline = "solana_sniper.baseline:main"
 solana-run-boosting = "solana_sniper.boosting:main"
 solana-build-creator-history = "solana_sniper.creator_history:main"
 solana-run-creator-history = "solana_sniper.creator_history_experiment:main"
+solana-run-creator-stability = "solana_sniper.creator_history_stability:main"
 
 [build-system]
 requires = ["hatchling"]

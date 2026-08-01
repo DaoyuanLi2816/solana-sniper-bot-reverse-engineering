@@ -20,6 +20,20 @@ from solana_sniper.manifest import append_experiment, sha256_file
 from solana_sniper.paths import PROCESSED_DIR, REPORT_DIR, project_relative
 from solana_sniper.splits import chronological_train_validation_test_split
 
+BOOSTING_PARAMETERS = {
+    "learning_rate": 0.05,
+    "max_iter": 300,
+    "max_leaf_nodes": 31,
+    "min_samples_leaf": 50,
+    "l2_regularization": 0.1,
+    "class_weight": "balanced",
+    "random_state": 20260801,
+}
+
+
+def build_boosting_model() -> HistGradientBoostingClassifier:
+    return HistGradientBoostingClassifier(**BOOSTING_PARAMETERS)
+
 
 def run_boosting(
     dataset_path: Path,
@@ -45,15 +59,7 @@ def run_boosting(
         validation_fraction=0.2,
         test_fraction=0.2,
     )
-    model = HistGradientBoostingClassifier(
-        learning_rate=0.05,
-        max_iter=300,
-        max_leaf_nodes=31,
-        min_samples_leaf=50,
-        l2_regularization=0.1,
-        class_weight="balanced",
-        random_state=20260801,
-    )
+    model = build_boosting_model()
     model.fit(split.train[numeric_features], split.train["label"])
     validation_probabilities = model.predict_proba(split.validation[numeric_features])[:, 1]
     validation_weights = _population_weights(split.validation["label"])
