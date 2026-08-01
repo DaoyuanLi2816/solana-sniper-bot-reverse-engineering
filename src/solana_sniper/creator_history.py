@@ -60,9 +60,16 @@ def build_creator_history_dataset(
                 PARTITION BY tx_signer ORDER BY blockSlot
                 ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
             ) AS creator_first_prior_deploy_time,
+            min(blockSlot) OVER (
+                PARTITION BY tx_signer ORDER BY blockSlot
+                ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+            ) AS creator_first_prior_deploy_slot,
             lag(block_time) OVER (
                 PARTITION BY tx_signer ORDER BY blockSlot
             ) AS creator_previous_deploy_time,
+            lag(blockSlot) OVER (
+                PARTITION BY tx_signer ORDER BY blockSlot
+            ) AS creator_previous_deploy_slot,
             block_time
         FROM creator_slots
         """
@@ -71,8 +78,8 @@ def build_creator_history_dataset(
         """
         SELECT count(*)
         FROM creator_slot_history
-        WHERE creator_previous_deploy_time >= block_time
-           OR creator_first_prior_deploy_time >= block_time
+        WHERE creator_previous_deploy_slot >= blockSlot
+           OR creator_first_prior_deploy_slot >= blockSlot
         """
     ).fetchone()[0]
     if violation_count:

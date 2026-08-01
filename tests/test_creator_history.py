@@ -23,8 +23,8 @@ def test_creator_history_excludes_same_slot_and_future(tmp_path: Path) -> None:
     for line, slot, timestamp, token in [
         (1, 10, 100, "token-1"),
         (2, 20, 200, "token-2"),
-        (3, 30, 300, "token-3"),
-        (3, 30, 300, "token-4"),
+        (3, 30, 200, "token-3"),
+        (3, 30, 200, "token-4"),
     ]:
         negative_rows.append(
             {
@@ -59,7 +59,7 @@ def test_creator_history_excludes_same_slot_and_future(tmp_path: Path) -> None:
             "token_address": [row["token_address"] for row in negative_rows],
             "tx_signer": ["creator-a"] * 4,
             "blockSlot": [10, 20, 30, 30],
-            "decision_time": pd.to_datetime([100, 200, 300, 300], unit="s", utc=True),
+            "decision_time": pd.to_datetime([100, 200, 200, 200], unit="s", utc=True),
             "label": [0, 0, 0, 0],
         }
     )
@@ -72,4 +72,4 @@ def test_creator_history_excludes_same_slot_and_future(tmp_path: Path) -> None:
     output = pd.read_parquet(output_path).sort_values("token_address")
     assert result["strict_time_violations"] == 0
     assert output["creator_prior_deploy_count"].tolist() == [0, 1, 2, 2]
-    assert output["creator_seconds_since_previous_deploy"].tolist()[1:] == [100.0, 100.0, 100.0]
+    assert output["creator_seconds_since_previous_deploy"].tolist()[1:] == [100.0, 0.0, 0.0]
