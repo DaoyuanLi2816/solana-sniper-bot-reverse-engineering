@@ -21,7 +21,13 @@ from solana_sniper.paths import PROCESSED_DIR, REPORT_DIR, project_relative
 from solana_sniper.splits import chronological_train_validation_test_split
 
 
-def run_boosting(dataset_path: Path) -> dict[str, object]:
+def run_boosting(
+    dataset_path: Path,
+    *,
+    experiment: str = "hist_gradient_boosting_predecision",
+    single_change: str = "model_family_logistic_to_hist_gradient_boosting",
+    evaluate_test: bool = True,
+) -> dict[str, object]:
     frame = pd.read_parquet(dataset_path)
     positive_times = frame.loc[frame["label"] == 1, "decision_time"]
     active_start = positive_times.min()
@@ -54,11 +60,9 @@ def run_boosting(dataset_path: Path) -> dict[str, object]:
     operating_point = _best_f1_threshold(
         split.validation["label"], validation_probabilities, validation_weights
     )
-    test_probabilities = model.predict_proba(split.test[numeric_features])[:, 1]
-    test_weights = _population_weights(split.test["label"])
-    return {
-        "experiment": "hist_gradient_boosting_predecision",
-        "single_change_from_baseline": "model_family_logistic_to_hist_gradient_boosting",
+    result: dict[str, object] = {
+        "experiment": experiment,
+        "single_change_from_baseline": single_change,
         "dataset": project_relative(dataset_path),
         "dataset_sha256": sha256_file(dataset_path),
         "active_window_start": active_start.isoformat(),
@@ -78,12 +82,17 @@ def run_boosting(dataset_path: Path) -> dict[str, object]:
             np.average(split.validation["label"].to_numpy(), weights=validation_weights)
         ),
         "validation_selected_population_operating_point": operating_point,
-        "test_metrics_at_validation_threshold": _fixed_threshold_metrics(
-            split.test["label"], test_probabilities, operating_point["threshold"], test_weights
-        ),
+        "test_status": "evaluated" if evaluate_test else "withheld_until_candidate_freeze",
         "feature_names": numeric_features,
         "hyperparameters": model.get_params(),
     }
+    if evaluate_test:
+        test_probabilities = model.predict_proba(split.test[numeric_features])[:, 1]
+        test_weights = _population_weights(split.test["label"])
+        result["test_metrics_at_validation_threshold"] = _fixed_threshold_metrics(
+            split.test["label"], test_probabilities, operating_point["threshold"], test_weights
+        )
+    return result
 
 
 def main() -> None:

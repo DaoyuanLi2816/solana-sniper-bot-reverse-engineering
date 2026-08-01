@@ -1,5 +1,6 @@
 import hashlib
 import json
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -19,3 +20,14 @@ def append_experiment(record: dict[str, object]) -> None:
     payload = {"recorded_at_utc": datetime.now(UTC).isoformat(), **record}
     with MANIFEST_PATH.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, sort_keys=True) + "\n")
+
+
+def git_head() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=MANIFEST_PATH.parent.parent,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()

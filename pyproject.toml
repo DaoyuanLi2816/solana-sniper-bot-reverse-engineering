@@ -28,6 +28,8 @@ solana-entry-latency = "solana_sniper.entry_latency:main"
 solana-stream-negatives = "solana_sniper.stream_negative_sample:main"
 solana-run-baseline = "solana_sniper.baseline:main"
 solana-run-boosting = "solana_sniper.boosting:main"
+solana-build-creator-history = "solana_sniper.creator_history:main"
+solana-run-creator-history = "solana_sniper.creator_history_experiment:main"
 
 [build-system]
 requires = ["hatchling"]
