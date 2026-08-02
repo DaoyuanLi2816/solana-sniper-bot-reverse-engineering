@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-01 23:39 UTC
+Last verified: 2026-08-02 02:45 UTC
 
 ## Remote state
 
@@ -134,5 +134,23 @@ first later observed trade. Median additional wait is one slot, but the p95 is 1
 slots. Consequently, the table is retained as an observed-trade execution proxy, not evidence that
 every requested delay fills on time. Backtests must report actual delay and exact-target coverage.
 
-The next priority is a train/validation-only execution-policy comparison that preserves this
-coverage limitation, incorporates explicit fees, and still leaves the final holdout sealed.
+## Six-second validation replica backtest
+
+The training-only wallet history freezes a six-second median hold, USD 201.16 median first-buy
+notional, 730.22 bps median round-trip fee, and 1,862.05 bps p90 fee. At the creator-history
+validation operating point (PR-AUC 0.08934, precision 12.74%, recall 23.49%, F1 0.165), 387
+sampled June validation deployments were selected. No prediction or outcome reached the final
+holdout start; the latest backtest mark was 2026-06-09 14:40:28 UTC.
+
+With the median fee, the all-observed 0-slot proxy has +33.08% population-weighted mean return,
++15.42% unweighted median return, 43.92% weighted hit rate, and 11.47% maximum drawdown. Exact
+target-slot execution covers only 76.42% of the weighted attempts. Requested delay 1 falls to
+-1.47% mean and -11.73% median after median fees. Requested delay 2 has a misleading +26.66%
+mean but -9.74% median; rare winners dominate, and the tight capital model crosses zero for both
+delayed strategies.
+
+This supports the fixed-hold hypothesis on development data only for near-zero-slot execution.
+The exit is still a last-trade mark rather than a demonstrated sell fill, the validation-selected
+threshold is not independent, and the population-weighted sampled path is approximate. The final
+holdout remains sealed. The next priority is to audit zero-slot transaction-order feasibility and
+construct a sell-side executable exit proxy before freezing a candidate.
