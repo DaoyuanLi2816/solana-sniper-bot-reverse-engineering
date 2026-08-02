@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="390" viewBox="0 0 880 390">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="28" y="34" font-family="Arial" font-size="22" font-weight="700" fill="#111827">Fee-adjusted selector at position lag 112</text>
+<text x="28" y="58" font-family="Arial" font-size="13" fill="#4b5563">Weighted net mean return; validation only; final holdout sealed</text>
+<line x1="70" y1="257.2" x2="830" y2="257.2" stroke="#9ca3af"/>
+<rect x="152" y="149.7" width="36" height="107.6" fill="#64748b"/>
+<text x="170" y="142.7" text-anchor="middle" font-family="Arial" font-size="11">+12.8%</text>
+<rect x="198" y="86.0" width="36" height="171.2" fill="#0f766e"/>
+<text x="216" y="79.0" text-anchor="middle" font-family="Arial" font-size="11">+20.4%</text>
+<text x="190" y="350" text-anchor="middle" font-family="Arial" font-size="13">Gross</text>
+<rect x="392" y="211.0" width="36" height="46.3" fill="#64748b"/>
+<text x="410" y="204.0" text-anchor="middle" font-family="Arial" font-size="11">+5.5%</text>
+<rect x="438" y="147.3" width="36" height="109.9" fill="#0f766e"/>
+<text x="456" y="140.3" text-anchor="middle" font-family="Arial" font-size="11">+13.1%</text>
+<text x="430" y="350" text-anchor="middle" font-family="Arial" font-size="13">Median fees</text>
+<rect x="632" y="257.2" width="36" height="48.8" fill="#64748b"/>
+<text x="650" y="324.0" text-anchor="middle" font-family="Arial" font-size="11">-5.8%</text>
+<rect x="678" y="242.3" width="36" height="14.9" fill="#0f766e"/>
+<text x="696" y="235.3" text-anchor="middle" font-family="Arial" font-size="11">+1.8%</text>
+<text x="670" y="350" text-anchor="middle" font-family="Arial" font-size="13">P90 fees</text>
+<rect x="615" y="27" width="12" height="12" fill="#64748b"/>
+<text x="633" y="38" font-family="Arial" font-size="12">Raw delta</text>
+<rect x="715" y="27" width="12" height="12" fill="#0f766e"/>
+<text x="733" y="38" font-family="Arial" font-size="12">Nonfee outflow</text>
+</svg>
