@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-02 05:42 UTC
+Last verified: 2026-08-02 08:42 UTC
 
 ## Remote state
 
@@ -174,3 +174,23 @@ This negative result materially weakens a raw-return story but strengthens the s
 honesty: profitable replication is dominated by execution timing, and same-slot feasibility must
 be modeled rather than assumed. The next priority is a sell-side executable exit audit and a
 head-to-head target-wallet comparison that does not reuse first-trade prices as attainable fills.
+
+## Fee-adjusted competitor benchmark
+
+The target-wallet cash-flow hypothesis is supported. Across 15,921 matched closed tokens, gross
+PnL is USD 1,468,491; recorded network and DEX fees total USD 545,896; net PnL remains USD
+922,595. Net mean ROI is +13.45%, median ROI +4.78%, hit rate 59.39%, average win USD 116.98,
+and average loss USD 28.37. Median hold is six seconds and median exit structure is four sells.
+The 0.84% full-period drawdown is a closed-token realized curve and omits intratrade marks.
+
+In the June development window ending before the final holdout, all 1,372 target buys close before
+the boundary. Recorded fees reduce gross PnL from USD 90,714 to USD 48,848, but net mean ROI remains
++10.71%, median +3.05%, hit rate 56.63%, and realized maximum drawdown 6.89%. The latest outcome
+is 2026-06-09 14:59:17 UTC, before the 15:12:25 holdout start.
+
+The position-lag replica is materially weaker in the same window: +5.51% weighted mean but -6.78%
+median ROI, 38.18% hit rate, and 111.97% drawdown under median fees. Dollar PnL is not directly
+comparable because the target uses actual variable sizing while the replica uses fixed notional
+and population weights. The classifier and replica final holdouts remain sealed. The next priority
+is an executable sell proxy and an interpretable top-10 feature summary suitable for the final
+writeup.
