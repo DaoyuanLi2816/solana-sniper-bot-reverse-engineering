@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-02 02:45 UTC
+Last verified: 2026-08-02 05:42 UTC
 
 ## Remote state
 
@@ -154,3 +154,23 @@ The exit is still a last-trade mark rather than a demonstrated sell fill, the va
 threshold is not independent, and the population-weighted sampled path is approximate. The final
 holdout remains sealed. The next priority is to audit zero-slot transaction-order feasibility and
 construct a sell-side executable exit proxy before freezing a candidate.
+
+## Zero-slot position-lag falsification
+
+The preceding first-trade zero-slot result is now classified as an optimistic price upper bound,
+not an executable candidate. In 7,377 training-period same-slot target-wallet buys, the median
+transaction-position gap after deployment is 112 (p10 25, p90 421). The prior proxy instead used
+a median gap of one among its exact-same-slot validation fills; only 22.97% of those first trades
+occurred at or after the frozen 112-position lag.
+
+Using the first same-slot trade no earlier than deployment index plus 112 reduces population-
+weighted fill coverage to 57.51%. With median training fees, weighted mean return falls from
++33.08% to +5.51%, while the unweighted median becomes -6.78%, hit rate is 38.18%, and maximum
+drawdown is 111.97% with negative interim equity. At p90 fees, mean return is -5.81%, median is
+-18.10%, and drawdown is 258.96%.
+
+The position-lag hypothesis is rejected on validation and will not receive final-holdout access.
+This negative result materially weakens a raw-return story but strengthens the submission's
+honesty: profitable replication is dominated by execution timing, and same-slot feasibility must
+be modeled rather than assumed. The next priority is a sell-side executable exit audit and a
+head-to-head target-wallet comparison that does not reuse first-trade prices as attainable fills.
