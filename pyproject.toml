@@ -40,6 +40,7 @@ solana-download-trades = "solana_sniper.download_trades:main"
 solana-audit-trades = "solana_sniper.audit_trades:main"
 solana-build-entry-prices = "solana_sniper.entry_prices:main"
 solana-run-replica-backtest = "solana_sniper.replica_backtest:main"
+solana-run-outflow-replica = "solana_sniper.outflow_replica_backtest:main"
 solana-run-position-backtest = "solana_sniper.position_backtest:main"
 solana-run-competitor-pnl = "solana_sniper.competitor_pnl:main"
 

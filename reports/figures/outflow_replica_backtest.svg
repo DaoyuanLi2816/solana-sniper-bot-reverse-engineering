@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="370" viewBox="0 0 860 370">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="28" y="34" font-family="Arial" font-size="22" font-weight="700" fill="#111827">Fee-adjusted selector: replica economics</text>
+<text x="28" y="57" font-family="Arial" font-size="13" fill="#4b5563">Training-median fees; weighted mean return; final holdout sealed</text>
+<line x1="70" y1="292.9" x2="810" y2="292.9" stroke="#9ca3af"/>
+<rect x="155" y="177.5" width="34" height="115.4" fill="#64748b"/>
+<text x="172" y="170.5" text-anchor="middle" font-family="Arial" font-size="11">+33.1%</text>
+<rect x="200" y="78.0" width="34" height="214.9" fill="#0f766e"/>
+<text x="217" y="71.0" text-anchor="middle" font-family="Arial" font-size="11">+61.6%</text>
+<text x="190" y="335" text-anchor="middle" font-family="Arial" font-size="13">delay 0</text>
+<rect x="385" y="292.9" width="34" height="5.1" fill="#64748b"/>
+<text x="402" y="316.0" text-anchor="middle" font-family="Arial" font-size="11">-1.5%</text>
+<rect x="430" y="276.9" width="34" height="16.0" fill="#0f766e"/>
+<text x="447" y="269.9" text-anchor="middle" font-family="Arial" font-size="11">+4.6%</text>
+<text x="420" y="335" text-anchor="middle" font-family="Arial" font-size="13">delay 1</text>
+<rect x="615" y="199.8" width="34" height="93.0" fill="#64748b"/>
+<text x="632" y="192.8" text-anchor="middle" font-family="Arial" font-size="11">+26.7%</text>
+<rect x="660" y="285.3" width="34" height="7.6" fill="#0f766e"/>
+<text x="677" y="278.3" text-anchor="middle" font-family="Arial" font-size="11">+2.2%</text>
+<text x="650" y="335" text-anchor="middle" font-family="Arial" font-size="13">delay 2</text>
+<rect x="590" y="26" width="12" height="12" fill="#64748b"/>
+<text x="608" y="37" font-family="Arial" font-size="12">Raw delta</text>
+<rect x="690" y="26" width="12" height="12" fill="#0f766e"/>
+<text x="708" y="37" font-family="Arial" font-size="12">Nonfee outflow</text>
+</svg>
