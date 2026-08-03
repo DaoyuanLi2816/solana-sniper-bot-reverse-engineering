@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="330" viewBox="0 0 860 330">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="28" y="34" font-family="Arial" font-size="22" font-weight="700" fill="#111827">Strict prior creator deployment rate</text>
+<text x="28" y="57" font-family="Arial" font-size="13" fill="#4b5563">Population-weighted PR-AUC; final holdout sealed</text>
+<line x1="90" y1="270" x2="790" y2="270" stroke="#9ca3af"/>
+<rect x="142.5" y="143.4" width="30" height="126.6" fill="#64748b"/>
+<rect x="182.5" y="116.6" width="30" height="153.4" fill="#2563eb"/>
+<text x="177.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Fold 1</text>
+<text x="157.5" y="137.4" text-anchor="middle" font-family="Arial" font-size="11">0.0805</text>
+<text x="197.5" y="110.6" text-anchor="middle" font-family="Arial" font-size="11">0.0976</text>
+<rect x="317.5" y="111.4" width="30" height="158.6" fill="#64748b"/>
+<rect x="357.5" y="100.4" width="30" height="169.6" fill="#2563eb"/>
+<text x="352.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Fold 2</text>
+<text x="332.5" y="105.4" text-anchor="middle" font-family="Arial" font-size="11">0.1009</text>
+<text x="372.5" y="94.4" text-anchor="middle" font-family="Arial" font-size="11">0.1079</text>
+<rect x="492.5" y="133.0" width="30" height="137.0" fill="#64748b"/>
+<rect x="532.5" y="132.8" width="30" height="137.2" fill="#2563eb"/>
+<text x="527.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Fold 3</text>
+<text x="507.5" y="127.0" text-anchor="middle" font-family="Arial" font-size="11">0.0871</text>
+<text x="547.5" y="126.8" text-anchor="middle" font-family="Arial" font-size="11">0.0873</text>
+<rect x="667.5" y="113.9" width="30" height="156.1" fill="#64748b"/>
+<rect x="707.5" y="136.2" width="30" height="133.8" fill="#2563eb"/>
+<text x="702.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Standard</text>
+<text x="682.5" y="107.9" text-anchor="middle" font-family="Arial" font-size="11">0.0993</text>
+<text x="722.5" y="130.2" text-anchor="middle" font-family="Arial" font-size="11">0.0851</text>
+<rect x="570" y="28" width="12" height="12" fill="#64748b"/>
+<text x="588" y="39" font-family="Arial" font-size="12">Baseline</text>
+<rect x="680" y="28" width="12" height="12" fill="#2563eb"/>
+<text x="698" y="39" font-family="Arial" font-size="12">With rate</text>
+</svg>
