@@ -4,6 +4,7 @@ import pytest
 from solana_sniper.deployment_outflow_proxy import (
     NONINFERIORITY_MARGIN,
     PROXY_FEATURE,
+    _performance_interpretation,
     add_deployment_outflow_proxy,
     noninferiority_decision,
 )
@@ -44,3 +45,9 @@ def test_noninferiority_decision_uses_predeclared_margin() -> None:
     )
     with pytest.raises(ValueError, match="at least one"):
         noninferiority_decision([], 0.0)
+
+
+def test_report_does_not_claim_improvement_for_noninferior_proxy() -> None:
+    interpretation = _performance_interpretation(improved_all=False, accepted=True)
+    assert "did not increase PR-AUC in every development check" in interpretation
+    assert "rather than a performance-improvement claim" in interpretation

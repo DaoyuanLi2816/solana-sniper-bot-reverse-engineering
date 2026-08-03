@@ -50,6 +50,17 @@ def noninferiority_decision(deltas: list[float], standard_delta: float) -> str:
     )
 
 
+def _performance_interpretation(*, improved_all: bool, accepted: bool) -> str:
+    if improved_all:
+        return "It increased PR-AUC in all three expanding folds and standard validation."
+    if accepted:
+        return (
+            "It did not increase PR-AUC in every development check, so retention is a semantic "
+            "noninferiority decision rather than a performance-improvement claim."
+        )
+    return "It is therefore not retained as the current selector feature."
+
+
 def _class_profile(frame: pd.DataFrame, column: str) -> dict[str, object]:
     profiles = {}
     for label, name in ((0, "not_bought"), (1, "bought")):
@@ -239,6 +250,10 @@ def render_report(metrics: dict[str, object]) -> str:
         else "The proxy is rejected because at least one development check exceeded the "
         "predeclared 0.002 PR-AUC noninferiority margin."
     )
+    performance_interpretation = _performance_interpretation(
+        improved_all=metrics["proxy_pr_auc_improved_all_development_checks"],
+        accepted=accepted,
+    )
     fold_rows = []
     for row in metrics["expanding_folds"]:
         proxy_op = row["fee_adjusted_outflow_proxy"]["selected_operating_point"]
@@ -297,10 +312,9 @@ def render_report(metrics: dict[str, object]) -> str:
 
 ## Decision
 
-{decision} It also increased PR-AUC in all three expanding folds and standard validation, and the
-full metrics dictionary matched exactly across two deterministic runs. This is a reproduced
-**development-period** improvement, not an independent final estimate; the final chronological
-holdout remains sealed.
+{decision} {performance_interpretation} The full metrics dictionary matched exactly across two
+deterministic runs. These are development-period comparisons, not an independent final estimate;
+the final chronological holdout remains sealed.
 
 | Fold | Validation period | Raw PR-AUC | Proxy PR-AUC | Delta | Precision | Recall | F1 |
 |---:|---|---:|---:|---:|---:|---:|---:|

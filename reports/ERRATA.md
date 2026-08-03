@@ -40,3 +40,14 @@ before final submission.
 
 Detailed evidence is in [time_feature_integrity.md](time_feature_integrity.md) and
 [time_feature_remediation.md](time_feature_remediation.md).
+
+## Revalidated selector after remediation
+
+The fee-adjusted deployment-signer outflow proxy was rerun on repaired strict-history dataset
+`57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f`. Its PR-AUC deltas
+versus the raw signer balance delta were -0.00194, -0.00106, and +0.00217 in the three expanding
+folds, and -0.00048 in standard validation. It remains within the predeclared 0.002
+noninferiority margin in every development check, but the minimum delta is only 0.000058 above
+that boundary. It is retained for semantic interpretation, not claimed as a performance
+improvement. The corrected metrics and operating point are in
+[deployment_outflow_proxy.md](deployment_outflow_proxy.md); the final holdout remains sealed.
