@@ -1,6 +1,10 @@
 import pandas as pd
+import pytest
 
-from solana_sniper.creator_history_stability import expanding_time_folds
+from solana_sniper.creator_history_stability import (
+    expanding_time_folds,
+    stability_decision,
+)
 
 
 def test_expanding_folds_are_strict_and_cover_only_later_times() -> None:
@@ -31,3 +35,17 @@ def test_expanding_folds_are_strict_and_cover_only_later_times() -> None:
         assert fold.train["decision_time"].max() < fold.validation["decision_time"].min()
     assert len(folds[0].train) < len(folds[1].train) < len(folds[2].train)
     assert folds[-1].validation["decision_time"].max() == frame["decision_time"].max()
+
+
+def test_stability_decision_requires_every_development_check_to_improve() -> None:
+    assert stability_decision([0.01, 0.02, 0.001], 0.003) == (
+        "supported_improves_all_development_checks"
+    )
+    assert stability_decision([0.01, -0.001, 0.002], 0.003) == (
+        "rejected_not_consistent_across_development_checks"
+    )
+    assert stability_decision([0.01, 0.002, 0.003], 0.0) == (
+        "rejected_not_consistent_across_development_checks"
+    )
+    with pytest.raises(ValueError, match="at least one"):
+        stability_decision([], 0.001)

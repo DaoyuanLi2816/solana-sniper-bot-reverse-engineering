@@ -51,3 +51,16 @@ noninferiority margin in every development check, but the minimum delta is only 
 that boundary. It is retained for semantic interpretation, not claimed as a performance
 improvement. The corrected metrics and operating point are in
 [deployment_outflow_proxy.md](deployment_outflow_proxy.md); the final holdout remains sealed.
+
+## Revalidated strict history after remediation
+
+The strict prior deployment-signer history family was rerun on repaired strict-history dataset
+`57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f`. Its PR-AUC deltas
+versus an otherwise identical model without the four history fields were +0.03280, +0.02366, and
++0.01836 in the three expanding folds, and +0.01652 in standard validation. It therefore passes
+the predeclared requirement that every development check improve. The corrected standard model
+has PR-AUC 0.07028, precision 0.1203, recall 0.2011, and F1 0.1506 at threshold 0.937099. This
+supports strict prior signer recurrence, observed maturity, and spacing as the current core
+explainable signal; it does not prove creator identity or true on-chain wallet age. Detailed
+evidence is in [creator_history_stability.md](creator_history_stability.md); the final holdout
+remains sealed.

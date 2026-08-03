@@ -1,47 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="980" height="700" viewBox="0 0 980 700" role="img" aria-labelledby="title desc">
-  <title id="title">Creator-history temporal stability and permutation attribution</title>
-  <desc id="desc">Creator history improves PR-AUC in all three time folds. Joint permutation causes the largest PR-AUC drop.</desc>
-  <rect width="980" height="700" fill="#ffffff"/>
-  <text x="40" y="42" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#111827">Creator-history stability and attribution</text>
-  <text x="40" y="70" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Population-adjusted PR-AUC; final test withheld</text>
-
-  <text x="40" y="112" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#1f2937">Expanding chronological folds</text>
-  <text x="40" y="153" font-family="Arial, sans-serif" font-size="15" fill="#374151">Fold 1</text>
-  <rect x="150" y="132" width="220" height="18" rx="2" fill="#93c5fd"/>
-  <rect x="150" y="154" width="354" height="18" rx="2" fill="#10b981"/>
-  <text x="380" y="147" font-family="Arial, sans-serif" font-size="13">0.04896</text>
-  <text x="514" y="169" font-family="Arial, sans-serif" font-size="13">0.07871</text>
-  <text x="40" y="223" font-family="Arial, sans-serif" font-size="15" fill="#374151">Fold 2</text>
-  <rect x="150" y="202" width="322" height="18" rx="2" fill="#93c5fd"/>
-  <rect x="150" y="224" width="448" height="18" rx="2" fill="#10b981"/>
-  <text x="482" y="217" font-family="Arial, sans-serif" font-size="13">0.07159</text>
-  <text x="608" y="239" font-family="Arial, sans-serif" font-size="13">0.09951</text>
-  <text x="40" y="293" font-family="Arial, sans-serif" font-size="15" fill="#374151">Fold 3</text>
-  <rect x="150" y="272" width="277" height="18" rx="2" fill="#93c5fd"/>
-  <rect x="150" y="294" width="362" height="18" rx="2" fill="#10b981"/>
-  <text x="437" y="287" font-family="Arial, sans-serif" font-size="13">0.06165</text>
-  <text x="522" y="309" font-family="Arial, sans-serif" font-size="13">0.08035</text>
-  <rect x="620" y="142" width="18" height="18" fill="#93c5fd"/>
-  <text x="646" y="157" font-family="Arial, sans-serif" font-size="14" fill="#374151">Transaction only</text>
-  <rect x="620" y="174" width="18" height="18" fill="#10b981"/>
-  <text x="646" y="189" font-family="Arial, sans-serif" font-size="14" fill="#374151">+ creator history</text>
-
-  <line x1="40" y1="350" x2="940" y2="350" stroke="#d1d5db"/>
-  <text x="40" y="392" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#1f2937">Permutation PR-AUC drop</text>
-  <text x="40" y="433" font-family="Arial, sans-serif" font-size="15" fill="#374151">All creator features</text>
-  <rect x="280" y="414" width="432" height="22" rx="3" fill="#047857"/>
-  <text x="722" y="431" font-family="Arial, sans-serif" font-size="13">0.07199</text>
-  <text x="40" y="483" font-family="Arial, sans-serif" font-size="15" fill="#374151">Time since previous</text>
-  <rect x="280" y="464" width="308" height="22" rx="3" fill="#34d399"/>
-  <text x="598" y="481" font-family="Arial, sans-serif" font-size="13">0.05131</text>
-  <text x="40" y="533" font-family="Arial, sans-serif" font-size="15" fill="#374151">Observed age</text>
-  <rect x="280" y="514" width="288" height="22" rx="3" fill="#34d399"/>
-  <text x="578" y="531" font-family="Arial, sans-serif" font-size="13">0.04805</text>
-  <text x="40" y="583" font-family="Arial, sans-serif" font-size="15" fill="#374151">Prior deploy count</text>
-  <rect x="280" y="564" width="209" height="22" rx="3" fill="#6ee7b7"/>
-  <text x="499" y="581" font-family="Arial, sans-serif" font-size="13">0.03487</text>
-  <text x="40" y="633" font-family="Arial, sans-serif" font-size="15" fill="#374151">Prior active slots</text>
-  <rect x="280" y="614" width="123" height="22" rx="3" fill="#a7f3d0"/>
-  <text x="413" y="631" font-family="Arial, sans-serif" font-size="13">0.02047</text>
-  <text x="40" y="675" font-family="Arial, sans-serif" font-size="13" fill="#6b7280">Five fixed-seed permutations; individual drops are not additive.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="330" viewBox="0 0 860 330">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="28" y="34" font-family="Arial" font-size="22" font-weight="700" fill="#111827">Strict prior deployment-signer history</text>
+<text x="28" y="57" font-family="Arial" font-size="13" fill="#4b5563">Population-weighted PR-AUC after UTC remediation; final holdout sealed</text>
+<line x1="90" y1="270" x2="790" y2="270" stroke="#9ca3af"/>
+<rect x="142.5" y="205.9" width="30" height="64.1" fill="#64748b"/>
+<rect x="182.5" y="137.6" width="30" height="132.4" fill="#2563eb"/>
+<text x="177.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Fold 1</text>
+<text x="157.5" y="199.9" text-anchor="middle" font-family="Arial" font-size="11">0.0308</text>
+<text x="197.5" y="131.6" text-anchor="middle" font-family="Arial" font-size="11">0.0636</text>
+<rect x="317.5" y="149.6" width="30" height="120.4" fill="#64748b"/>
+<rect x="357.5" y="100.4" width="30" height="169.6" fill="#2563eb"/>
+<text x="352.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Fold 2</text>
+<text x="332.5" y="143.6" text-anchor="middle" font-family="Arial" font-size="11">0.0578</text>
+<text x="372.5" y="94.4" text-anchor="middle" font-family="Arial" font-size="11">0.0815</text>
+<rect x="492.5" y="155.0" width="30" height="115.0" fill="#64748b"/>
+<rect x="532.5" y="116.8" width="30" height="153.2" fill="#2563eb"/>
+<text x="527.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Fold 3</text>
+<text x="507.5" y="149.0" text-anchor="middle" font-family="Arial" font-size="11">0.0552</text>
+<text x="547.5" y="110.8" text-anchor="middle" font-family="Arial" font-size="11">0.0736</text>
+<rect x="667.5" y="158.1" width="30" height="111.9" fill="#64748b"/>
+<rect x="707.5" y="123.6" width="30" height="146.4" fill="#2563eb"/>
+<text x="702.5" y="290" text-anchor="middle" font-family="Arial" font-size="12" fill="#111827">Standard</text>
+<text x="682.5" y="152.1" text-anchor="middle" font-family="Arial" font-size="11">0.0538</text>
+<text x="722.5" y="117.6" text-anchor="middle" font-family="Arial" font-size="11">0.0703</text>
+<rect x="545" y="28" width="12" height="12" fill="#64748b"/>
+<text x="563" y="39" font-family="Arial" font-size="12">Without history</text>
+<rect x="680" y="28" width="12" height="12" fill="#2563eb"/>
+<text x="698" y="39" font-family="Arial" font-size="12">With history</text>
 </svg>
