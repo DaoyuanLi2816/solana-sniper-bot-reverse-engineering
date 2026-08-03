@@ -43,6 +43,7 @@ solana-run-replica-backtest = "solana_sniper.replica_backtest:main"
 solana-run-outflow-replica = "solana_sniper.outflow_replica_backtest:main"
 solana-run-outflow-position = "solana_sniper.outflow_position_backtest:main"
 solana-run-priority-intensity = "solana_sniper.priority_fee_intensity:main"
+solana-run-metadata-uri-payload = "solana_sniper.metadata_uri_payload:main"
 solana-run-position-backtest = "solana_sniper.position_backtest:main"
 solana-run-competitor-pnl = "solana_sniper.competitor_pnl:main"
 
