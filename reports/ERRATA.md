@@ -64,3 +64,16 @@ supports strict prior signer recurrence, observed maturity, and spacing as the c
 explainable signal; it does not prove creator identity or true on-chain wallet age. Detailed
 evidence is in [creator_history_stability.md](creator_history_stability.md); the final holdout
 remains sealed.
+
+## Revalidated feature attribution after remediation
+
+The complete grouped and individual permutation analysis was rerun on repaired strict-history
+dataset `57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f`. Strict prior
+deployment-signer history ranks first in every expanding fold, with mean temporal PR-AUC drop
+0.05661, narrowly ahead of transaction structure at 0.05262. All four strict history features have
+positive drops in all three folds. The corrected Top-10 begins with raw signer lamport delta,
+seconds since prior deploy, observed signer deployment age, and prior signer deploy count. The
+decision-time group falls to mean drop -0.00029, so the old apparent time-of-day importance must
+not be cited. The standard development operating point remains PR-AUC 0.07028, precision 0.1203,
+recall 0.2011, and F1 0.1506 at threshold 0.937099. Detailed current evidence is in
+[feature_attribution.md](feature_attribution.md); the final holdout remains sealed.

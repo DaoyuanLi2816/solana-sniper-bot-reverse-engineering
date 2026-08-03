@@ -55,9 +55,9 @@ FEATURE_GROUPS = {
 }
 
 FEATURE_LABELS = {
-    "creator_prior_deploy_count": "Prior deploy count",
-    "creator_prior_active_slot_count": "Prior active-slot count",
-    "creator_observed_age_seconds": "Observed creator age",
+    "creator_prior_deploy_count": "Prior signer deploy count",
+    "creator_prior_active_slot_count": "Prior signer active-slot count",
+    "creator_observed_age_seconds": "Observed signer deploy age",
     "creator_seconds_since_previous_deploy": "Seconds since prior deploy",
     "tx_fee_lamports": "Transaction fee",
     "priority_fee_lamports": "Priority fee",
@@ -215,7 +215,16 @@ def feature_profiles(validation: pd.DataFrame, features: list[str]) -> dict[str,
 
 def run_feature_attribution(dataset_path: Path) -> dict[str, object]:
     frame = pd.read_parquet(dataset_path)
-    required = {"label", "decision_time", "token_address", "tx_hash"}
+    required = {
+        "label",
+        "decision_time",
+        "token_address",
+        "tx_hash",
+        "tx_signer",
+        "decision_hour_utc",
+        "decision_weekday_utc",
+        *CREATOR_HISTORY_FEATURES,
+    }
     missing = sorted(required - set(frame.columns))
     if missing:
         raise ValueError(f"dataset is missing required columns: {missing}")
@@ -223,6 +232,20 @@ def run_feature_attribution(dataset_path: Path) -> dict[str, object]:
         raise ValueError("token_address must be unique")
     if frame["label"].nunique() != 2:
         raise ValueError("dataset must contain both classes")
+
+    dataset_sha256 = sha256_file(dataset_path)
+    history_manifest_path = dataset_path.parent / "creator_history_manifest.json"
+    history_manifest = json.loads(history_manifest_path.read_text(encoding="utf-8"))
+    if history_manifest["sha256"] != dataset_sha256:
+        raise ValueError("creator-history manifest does not match the attribution dataset")
+    if history_manifest["rows"] != len(frame):
+        raise ValueError("creator-history manifest row count does not match the dataset")
+    if history_manifest["unique_tokens"] != frame["token_address"].nunique():
+        raise ValueError("creator-history manifest unique-token count does not match")
+    if history_manifest["strict_time_violations"] != 0:
+        raise ValueError("creator-history manifest reports strict-time violations")
+
+    canonical_time = pd.to_datetime(frame["decision_time"], utc=True)
 
     positive_times = frame.loc[frame["label"] == 1, "decision_time"]
     active_start = positive_times.min()
@@ -291,12 +314,19 @@ def run_feature_attribution(dataset_path: Path) -> dict[str, object]:
     return {
         "experiment": "all_feature_temporal_permutation_attribution",
         "single_hypothesis": (
-            "strict_prior_creator_recurrence_and_maturity_dominate_metadata_fee_compute_"
+            "strict_prior_signer_recurrence_and_maturity_dominate_metadata_fee_compute_"
             "transaction_structure_and_clock_features"
         ),
         "decision": decision,
+        "predeclared_acceptance_criterion": (
+            "strict prior signer history must have positive group permutation PR-AUC drop in "
+            "all three expanding folds, rank first by mean temporal drop, and be the largest "
+            "group in every fold"
+        ),
         "dataset": project_relative(dataset_path),
-        "dataset_sha256": sha256_file(dataset_path),
+        "dataset_sha256": dataset_sha256,
+        "creator_history_manifest": project_relative(history_manifest_path),
+        "creator_history_manifest_sha256": sha256_file(history_manifest_path),
         "code_parent_commit": git_head(),
         "schema": {
             "rows": int(len(frame)),
@@ -306,6 +336,47 @@ def run_feature_attribution(dataset_path: Path) -> dict[str, object]:
             "duplicate_tx_hash_rows": int(frame["tx_hash"].duplicated().sum()),
             "positive_rows": int((frame["label"] == 1).sum()),
             "negative_rows": int((frame["label"] == 0).sum()),
+            "strict_time_violations": int(history_manifest["strict_time_violations"]),
+            "negative_prior_count_rows": int((frame["creator_prior_deploy_count"] < 0).sum()),
+            "negative_prior_slot_count_rows": int(
+                (frame["creator_prior_active_slot_count"] < 0).sum()
+            ),
+            "negative_observed_age_rows": int(
+                (frame["creator_observed_age_seconds"].dropna() < 0).sum()
+            ),
+            "negative_recency_rows": int(
+                (frame["creator_seconds_since_previous_deploy"].dropna() < 0).sum()
+            ),
+            "nonzero_count_missing_age_rows": int(
+                (
+                    frame["creator_prior_deploy_count"].ne(0)
+                    & frame["creator_observed_age_seconds"].isna()
+                ).sum()
+            ),
+            "nonzero_count_missing_recency_rows": int(
+                (
+                    frame["creator_prior_deploy_count"].ne(0)
+                    & frame["creator_seconds_since_previous_deploy"].isna()
+                ).sum()
+            ),
+            "utc_hour_mismatch_rows": int(
+                frame["decision_hour_utc"].ne(canonical_time.dt.hour).sum()
+            ),
+            "utc_weekday_mismatch_rows": int(
+                frame["decision_weekday_utc"].ne(canonical_time.dt.dayofweek).sum()
+            ),
+        },
+        "history_definition": {
+            "creator_key": history_manifest["creator_key"],
+            "availability": (
+                "all signer-history counts and timestamps aggregate only deployment-index "
+                "slots strictly smaller than the current deployment slot"
+            ),
+            "semantic_limit": (
+                "tx_signer is the deployment transaction signer or fee payer and is not proven "
+                "to equal the token creator address"
+            ),
+            "post_deployment_inputs": "none",
         },
         "active_window_start": active_start.isoformat(),
         "active_window_end": active_end.isoformat(),
@@ -414,19 +485,44 @@ def render_report(metrics: dict[str, object]) -> str:
             )
         )
 
-    creator_group = metrics["group_importance"][0]
+    standard_metrics = metrics["standard_validation"]["metrics"]
+    standard_op = standard_metrics["selected_operating_point"]
+    standard_rows = [
+        f"| PR-AUC | {standard_metrics['population_adjusted_pr_auc']:.5f} |",
+        f"| Precision | {standard_op['precision']:.4f} |",
+        f"| Recall | {standard_op['recall']:.4f} |",
+        f"| F1 | {standard_op['f1']:.4f} |",
+        f"| Selected threshold | {standard_op['threshold']:.6f} |",
+    ]
+
+    creator_group = next(
+        row for row in metrics["group_importance"] if row["name"] == "creator_history"
+    )
     transaction_group = next(
         row for row in metrics["group_importance"] if row["name"] == "transaction_structure"
     )
+    top_feature = metrics["feature_importance"][0]
+    unstable_history = [
+        row
+        for row in metrics["feature_importance"]
+        if row["name"] in CREATOR_HISTORY_FEATURES
+        and row["positive_fold_count"] < row["fold_count"]
+    ]
+    if unstable_history:
+        unstable_text = "History features without positive drop in every fold: " + ", ".join(
+            FEATURE_LABELS[row["name"]] for row in unstable_history
+        )
+    else:
+        unstable_text = "All four strict history features have positive drops in every fold."
     decision_text = (
-        "The hypothesis is narrowly supported on development folds: strict prior creator "
+        "The hypothesis is supported on development folds: strict prior deployment-signer "
         "history ranks first and has a positive permutation drop in every fold. It is not an "
         "overwhelming lead: the mean drop is "
         f"{creator_group['mean_temporal_pr_auc_drop']:.5f} versus "
         f"{transaction_group['mean_temporal_pr_auc_drop']:.5f} for transaction structure."
         if metrics["decision"] == "supported_creator_history_is_dominant"
-        else "The hypothesis is not supported: strict prior creator history is not the dominant "
-        "feature family in every required temporal check."
+        else "The hypothesis is not supported: strict prior deployment-signer history is not "
+        "the dominant feature family in every required temporal check."
     )
     group_header = (
         "| Group | Mean temporal PR-AUC drop | Minimum fold drop | Positive folds | "
@@ -449,6 +545,12 @@ chronological holdout remains sealed.
 |---|---|---:|---:|---|
 {chr(10).join(fold_rows)}
 
+### Standard validation operating point
+
+| Metric | Value |
+|---|---:|
+{chr(10).join(standard_rows)}
+
 ## Top-10 individual features
 
 The rank is the mean weighted PR-AUC loss across three expanding chronological validation folds.
@@ -463,26 +565,34 @@ additive.
 
 ## Plain-language rule hypothesis
 
-The model is most consistent with two strong, complementary screens: creator maturity/spacing and
-the construction of the deployment transaction. It does **not** establish that either screen is
-evaluated first. The four creator-history associations are:
+The model is most consistent with two strong, complementary screens: observed deployment-signer
+maturity/spacing and the construction of the deployment transaction. It does **not** establish
+that either screen is evaluated first. The four strict-history associations are:
 
 {chr(10).join(creator_rules)}
 
 These are associations learned from strictly pre-decision fields. They do not prove the wallet's
-implementation or a causal trading rule. The strongest individual diagnostic is signer lamport
-delta, and the transaction-structure family is close to creator history, so the practical rule
-hypothesis must retain both. Prior active-slot count is also unstable (positive in only two of three
-folds), despite appearing in the top ten.
+implementation or a causal trading rule. The strongest individual diagnostic is
+{FEATURE_LABELS[top_feature["name"]]} with mean temporal drop
+{top_feature["mean_temporal_pr_auc_drop"]:.5f}. The transaction-structure family remains close to
+strict history, so the practical rule hypothesis must retain both. {unstable_text}
 
 ## Reproducibility and holdout boundary
 
 - Dataset: `{metrics["dataset"]}`; SHA-256 `{metrics["dataset_sha256"]}`.
+- Strict-history manifest: `{metrics["creator_history_manifest"]}`; SHA-256
+  `{metrics["creator_history_manifest_sha256"]}`.
 - Rows: {metrics["schema"]["rows"]:,}; unique tokens: {metrics["schema"]["unique_tokens"]:,};
   positives: {metrics["schema"]["positive_rows"]:,};
   negatives: {metrics["schema"]["negative_rows"]:,}.
+- Strict-history violations: {metrics["schema"]["strict_time_violations"]}; UTC feature
+  mismatches:
+  {metrics["schema"]["utc_hour_mismatch_rows"] + metrics["schema"]["utc_weekday_mismatch_rows"]}.
 - Temporal permutations: {metrics["temporal_repeats"]} deterministic repeats per feature/group;
   standard validation: {metrics["standard_repeats"]} repeats.
+- Two complete experiment runs matched the metrics dictionary exactly.
+- Same-slot and future signer history are excluded; no later trades, candles, prices, labels,
+  realized P&L, or outcome fields enter the model.
 - Maximum evaluated time: `{metrics["max_evaluated_time"]}`.
 - Final holdout starts: `{metrics["final_holdout_start"]}` and was not predicted.
 - Code parent: `{metrics["code_parent_commit"]}`.
@@ -532,6 +642,14 @@ def render_svg(metrics: dict[str, object]) -> str:
 def main() -> None:
     dataset_path = PROCESSED_DIR / "classification_dataset_creator_history.parquet"
     metrics = run_feature_attribution(dataset_path)
+    reproduced = run_feature_attribution(dataset_path)
+    if reproduced != metrics:
+        raise AssertionError("deterministic feature-attribution rerun did not match")
+    metrics["reproduction_verification"] = {
+        "verified": True,
+        "run_count": 2,
+        "comparison": "complete_metrics_dictionary_exact_match",
+    }
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     report_root = REPORT_DIR.parent
     figure_dir = report_root / "figures"

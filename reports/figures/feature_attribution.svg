@@ -4,32 +4,32 @@
 <text x="28" y="58" font-family="Arial" font-size="13" fill="#4b5563">Mean population-weighted PR-AUC drop across three chronological folds</text>
 <text x="28" y="101" font-family="Arial" font-size="12" fill="#111827">Signer lamport delta</text>
 <rect x="280" y="84" width="500.00" height="22" rx="3" fill="#4f46e5"/>
-<text x="788.00" y="100" font-family="Arial" font-size="12" fill="#111827">0.05309</text>
+<text x="788.00" y="100" font-family="Arial" font-size="12" fill="#111827">0.04372</text>
 <text x="28" y="137" font-family="Arial" font-size="12" fill="#111827">Seconds since prior deploy</text>
-<rect x="280" y="120" width="438.59" height="22" rx="3" fill="#0f766e"/>
-<text x="726.59" y="136" font-family="Arial" font-size="12" fill="#111827">0.04657</text>
-<text x="28" y="173" font-family="Arial" font-size="12" fill="#111827">Observed creator age</text>
-<rect x="280" y="156" width="367.49" height="22" rx="3" fill="#0f766e"/>
-<text x="655.49" y="172" font-family="Arial" font-size="12" fill="#111827">0.03902</text>
-<text x="28" y="209" font-family="Arial" font-size="12" fill="#111827">Prior deploy count</text>
-<rect x="280" y="192" width="205.71" height="22" rx="3" fill="#0f766e"/>
-<text x="493.71" y="208" font-family="Arial" font-size="12" fill="#111827">0.02184</text>
-<text x="28" y="245" font-family="Arial" font-size="12" fill="#111827">Decision hour UTC</text>
-<rect x="280" y="228" width="197.12" height="22" rx="3" fill="#4f46e5"/>
-<text x="485.12" y="244" font-family="Arial" font-size="12" fill="#111827">0.02093</text>
-<text x="28" y="281" font-family="Arial" font-size="12" fill="#111827">Inner instruction count</text>
-<rect x="280" y="264" width="139.12" height="22" rx="3" fill="#4f46e5"/>
-<text x="427.12" y="280" font-family="Arial" font-size="12" fill="#111827">0.01477</text>
-<text x="28" y="317" font-family="Arial" font-size="12" fill="#111827">Post-token balance count</text>
-<rect x="280" y="300" width="105.80" height="22" rx="3" fill="#4f46e5"/>
-<text x="393.80" y="316" font-family="Arial" font-size="12" fill="#111827">0.01123</text>
-<text x="28" y="353" font-family="Arial" font-size="12" fill="#111827">Metadata URI length</text>
-<rect x="280" y="336" width="65.97" height="22" rx="3" fill="#4f46e5"/>
-<text x="353.97" y="352" font-family="Arial" font-size="12" fill="#111827">0.00700</text>
-<text x="28" y="389" font-family="Arial" font-size="12" fill="#111827">Transaction fee</text>
-<rect x="280" y="372" width="55.74" height="22" rx="3" fill="#4f46e5"/>
-<text x="343.74" y="388" font-family="Arial" font-size="12" fill="#111827">0.00592</text>
-<text x="28" y="425" font-family="Arial" font-size="12" fill="#111827">Prior active-slot count</text>
-<rect x="280" y="408" width="45.33" height="22" rx="3" fill="#0f766e"/>
-<text x="333.33" y="424" font-family="Arial" font-size="12" fill="#111827">0.00481</text>
+<rect x="280" y="120" width="459.53" height="22" rx="3" fill="#0f766e"/>
+<text x="747.53" y="136" font-family="Arial" font-size="12" fill="#111827">0.04018</text>
+<text x="28" y="173" font-family="Arial" font-size="12" fill="#111827">Observed signer deploy age</text>
+<rect x="280" y="156" width="337.26" height="22" rx="3" fill="#0f766e"/>
+<text x="625.26" y="172" font-family="Arial" font-size="12" fill="#111827">0.02949</text>
+<text x="28" y="209" font-family="Arial" font-size="12" fill="#111827">Prior signer deploy count</text>
+<rect x="280" y="192" width="240.32" height="22" rx="3" fill="#0f766e"/>
+<text x="528.32" y="208" font-family="Arial" font-size="12" fill="#111827">0.02101</text>
+<text x="28" y="245" font-family="Arial" font-size="12" fill="#111827">Inner instruction count</text>
+<rect x="280" y="228" width="119.76" height="22" rx="3" fill="#4f46e5"/>
+<text x="407.76" y="244" font-family="Arial" font-size="12" fill="#111827">0.01047</text>
+<text x="28" y="281" font-family="Arial" font-size="12" fill="#111827">Post-token balance count</text>
+<rect x="280" y="264" width="100.17" height="22" rx="3" fill="#4f46e5"/>
+<text x="388.17" y="280" font-family="Arial" font-size="12" fill="#111827">0.00876</text>
+<text x="28" y="317" font-family="Arial" font-size="12" fill="#111827">Metadata URI length</text>
+<rect x="280" y="300" width="89.03" height="22" rx="3" fill="#4f46e5"/>
+<text x="377.03" y="316" font-family="Arial" font-size="12" fill="#111827">0.00778</text>
+<text x="28" y="353" font-family="Arial" font-size="12" fill="#111827">Transaction fee</text>
+<rect x="280" y="336" width="74.83" height="22" rx="3" fill="#4f46e5"/>
+<text x="362.83" y="352" font-family="Arial" font-size="12" fill="#111827">0.00654</text>
+<text x="28" y="389" font-family="Arial" font-size="12" fill="#111827">Prior signer active-slot count</text>
+<rect x="280" y="372" width="61.57" height="22" rx="3" fill="#0f766e"/>
+<text x="349.57" y="388" font-family="Arial" font-size="12" fill="#111827">0.00538</text>
+<text x="28" y="425" font-family="Arial" font-size="12" fill="#111827">Log message count</text>
+<rect x="280" y="408" width="60.44" height="22" rx="3" fill="#4f46e5"/>
+<text x="348.44" y="424" font-family="Arial" font-size="12" fill="#111827">0.00528</text>
 </svg>
