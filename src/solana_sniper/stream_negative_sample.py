@@ -102,10 +102,16 @@ def stream_sample(url: str, *, stride: int = 25, batch_size: int = 10_000) -> di
     return {"negative_rows_read": total, "negative_rows_sampled": sampled, "stride": stride}
 
 
-def join_index_and_features(stride: int) -> Path:
-    raw_features = PROCESSED_DIR / "negative_raw_features.parquet"
-    index = RAW_DIR / "core" / NEGATIVE_INDEX
-    output = PROCESSED_DIR / "negative_deploy_features.parquet"
+def join_index_and_features(
+    stride: int,
+    *,
+    raw_features: Path | None = None,
+    index: Path | None = None,
+    output: Path | None = None,
+) -> Path:
+    raw_features = raw_features or PROCESSED_DIR / "negative_raw_features.parquet"
+    index = index or RAW_DIR / "core" / NEGATIVE_INDEX
+    output = output or PROCESSED_DIR / "negative_deploy_features.parquet"
     temporary = output.with_suffix(output.suffix + ".part")
     connection = duckdb.connect()
     connection.read_parquet(str(raw_features)).create_view("sampled_raw_features")
@@ -143,8 +149,10 @@ def join_index_and_features(stride: int) -> Path:
                 f.metadata_present,
                 f.transaction_error,
                 0 AS label,
-                hour(to_timestamp(f.decision_time)) AS decision_hour_utc,
-                dayofweek(to_timestamp(f.decision_time)) AS decision_weekday_utc
+                hour(timezone('UTC', to_timestamp(f.decision_time)))
+                    AS decision_hour_utc,
+                isodow(timezone('UTC', to_timestamp(f.decision_time))) - 1
+                    AS decision_weekday_utc
             FROM sampled_raw_features AS f
             INNER JOIN negative_deploy_index AS i USING (line_number)
             WHERE i.line_number % {int(stride)} = 0
@@ -152,7 +160,26 @@ def join_index_and_features(stride: int) -> Path:
         """,
         [str(temporary)],
     )
+    output_stats = connection.execute(
+        """
+        SELECT
+            count(*),
+            sum(
+                decision_hour_utc
+                != hour(timezone('UTC', decision_time))
+            ),
+            sum(
+                decision_weekday_utc
+                != isodow(timezone('UTC', decision_time)) - 1
+            )
+        FROM read_parquet(?)
+        """,
+        [str(temporary)],
+    ).fetchone()
     connection.close()
+    if output_stats[1] or output_stats[2]:
+        temporary.unlink(missing_ok=True)
+        raise ValueError(f"Non-UTC negative time features detected: {output_stats}")
     temporary.replace(output)
     return output
 

@@ -16,6 +16,15 @@ class ThreeWayTimeSplit:
     test: pd.DataFrame
 
 
+def _deterministic_time_order(frame: pd.DataFrame, time_column: str) -> pd.DataFrame:
+    order_columns = [time_column]
+    for candidate in ("token_address", "tx_hash"):
+        if candidate in frame.columns:
+            order_columns.append(candidate)
+            break
+    return frame.sort_values(order_columns, kind="stable").reset_index(drop=True)
+
+
 def chronological_split(
     frame: pd.DataFrame,
     *,
@@ -24,7 +33,7 @@ def chronological_split(
 ) -> TimeSplit:
     if not 0 < validation_fraction < 1:
         raise ValueError("validation_fraction must be between zero and one")
-    ordered = frame.sort_values(time_column, kind="stable").reset_index(drop=True)
+    ordered = _deterministic_time_order(frame, time_column)
     cut = int(len(ordered) * (1 - validation_fraction))
     if cut <= 0 or cut >= len(ordered):
         raise ValueError("split would create an empty partition")
@@ -47,7 +56,7 @@ def chronological_train_validation_test_split(
         raise ValueError("validation_fraction and test_fraction must be positive")
     if validation_fraction + test_fraction >= 1:
         raise ValueError("validation_fraction plus test_fraction must be less than one")
-    ordered = frame.sort_values(time_column, kind="stable").reset_index(drop=True)
+    ordered = _deterministic_time_order(frame, time_column)
     unique_times = ordered[time_column].drop_duplicates().sort_values().reset_index(drop=True)
     if len(unique_times) < 3:
         raise ValueError("at least three distinct timestamps are required")

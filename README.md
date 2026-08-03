@@ -15,6 +15,16 @@ Features used by the classifier and replica strategy must exist at or before
 `t_decision`, the token deployment time. Post-deployment trades, candles, and
 outcomes are labels or backtest inputs only. They are never decision features.
 
+## Critical experiment erratum
+
+The original sampled-negative pipeline encoded hour in the DuckDB session timezone and weekday
+with a Sunday-zero convention, while positives used UTC and Monday-zero. This class-dependent
+preprocessing invalidates classification and selection-backtest claims tied to dataset SHA-256
+`5fc74ffb...`. The repaired strict-history dataset is
+`57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f`; its time-feature
+mismatch count is zero. The current sealed-development baseline is PR-AUC 0.06980, not 0.09933.
+See [reports/ERRATA.md](reports/ERRATA.md) before interpreting older reports.
+
 ## Layout
 
 - `config/competition.yaml`: live rules and campaign guardrails.
@@ -35,6 +45,8 @@ uv run solana-audit-wallet
 uv run solana-extract-positive
 uv run solana-entry-latency
 uv run solana-stream-negatives
+uv run solana-run-time-integrity
+uv run solana-verify-time-remediation
 uv run solana-run-baseline
 uv run solana-run-boosting
 uv run solana-build-creator-history

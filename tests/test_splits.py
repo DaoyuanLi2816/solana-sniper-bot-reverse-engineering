@@ -57,3 +57,40 @@ def test_three_way_split_keeps_tied_timestamps_together() -> None:
         )
         == 1
     )
+
+
+def test_three_way_split_orders_ties_by_unique_token() -> None:
+    frame = pd.DataFrame(
+        {
+            "time": pd.to_datetime(
+                [
+                    "2026-01-01",
+                    "2026-01-02",
+                    "2026-01-02",
+                    "2026-01-03",
+                    "2026-01-04",
+                    "2026-01-05",
+                ],
+                utc=True,
+            ),
+            "token_address": ["a", "z", "b", "c", "d", "e"],
+        }
+    )
+    first = chronological_train_validation_test_split(
+        frame,
+        time_column="time",
+        validation_fraction=0.2,
+        test_fraction=0.2,
+    )
+    second = chronological_train_validation_test_split(
+        frame.iloc[::-1].reset_index(drop=True),
+        time_column="time",
+        validation_fraction=0.2,
+        test_fraction=0.2,
+    )
+    for first_part, second_part in zip(
+        (first.train, first.validation, first.test),
+        (second.train, second.validation, second.test),
+        strict=True,
+    ):
+        assert first_part["token_address"].tolist() == second_part["token_address"].tolist()
