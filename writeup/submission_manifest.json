@@ -1,0 +1,24 @@
+{
+  "competition_slug": "solana-sniper-bot-reverse-engineering",
+  "submission_status": "local_mvp_incomplete_not_submitted",
+  "writeup": {
+    "path": "writeup/draft.md",
+    "word_count": 1638,
+    "max_words": 3000,
+    "sha256": "16f86487ed49ceefdec5bbdbbbd91c3d43c563186325766e7992b963425d972d",
+    "contains_superseded_dataset_hash": false
+  },
+  "cover": {
+    "path": "writeup/cover.png",
+    "width": 1672,
+    "height": 941,
+    "bytes": 1782055,
+    "sha256": "43ad9b10e26dafc7696f20c203cae47e3c85c6468c2db8f8720e0b40f9644ae4",
+    "generation_mode": "openai_builtin_imagegen"
+  },
+  "corrected_classification_sha256": "57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f",
+  "final_holdout_evaluated": false,
+  "public_notebook": null,
+  "public_repository": null,
+  "kaggle_writeup": null
+}
