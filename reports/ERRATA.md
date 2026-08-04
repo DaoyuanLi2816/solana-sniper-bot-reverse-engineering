@@ -77,3 +77,22 @@ decision-time group falls to mean drop -0.00029, so the old apparent time-of-day
 not be cited. The standard development operating point remains PR-AUC 0.07028, precision 0.1203,
 recall 0.2011, and F1 0.1506 at threshold 0.937099. Detailed current evidence is in
 [feature_attribution.md](feature_attribution.md); the final holdout remains sealed.
+
+## Revalidated replica backtest after remediation
+
+The raw deployment-signer delta plus strict prior signer-history selector was rerun twice with an
+exact complete-dictionary match on repaired dataset
+`57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f`. The June entry-price
+audit now references that corrected source; its 114,333 token-delay rows retain SHA-256
+`8971bc3c210d6d8a7b98b21fd6a0a66eefcc2aaf5b4e8b2fd27c6221d9cdad83`, confirming the UTC
+repair did not alter deployment context or post-deployment price ordering.
+
+At the training-derived median round-trip fee of 730.22 bps under all-observed execution, the
+requested 0/1/2-slot results are respectively: net weighted mean +74.86% / -4.32% / +32.86%,
+unweighted median +16.08% / -10.25% / -8.47%, hit rate 49.43% / 30.92% / 28.13%, and maximum
+drawdown 3.20% / 233.08% / 8.29%. Delay 1 crosses zero; delay 2 remains solvent but fails the
+positive-median requirement, so only requested delay zero passes the predeclared viability
+definition. The positive delay-2 mean is tail-driven and must not be presented as typical-trade
+profitability. These are validation diagnostics based on optimistic observed price marks, not
+guaranteed fills or an independent estimate. Detailed evidence is in
+[replica_validation_backtest.md](replica_validation_backtest.md); the final holdout remains sealed.

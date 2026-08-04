@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from solana_sniper.replica_backtest import (
+    backtest_acceptance_decision,
     calculate_portfolio_metrics,
     training_behavior_parameters,
 )
@@ -64,3 +65,39 @@ def test_portfolio_metrics_include_weighted_pnl_and_drawdown() -> None:
     assert result["initial_capital_usd"] == 300
     assert result["max_drawdown_usd"] == pytest.approx(42)
     assert result["max_drawdown_fraction"] == pytest.approx(42 / 309)
+
+
+def _acceptance_row(delay: int, mean: float, median: float, insolvent: bool) -> dict[str, object]:
+    return {
+        "requested_delay_slots": delay,
+        "execution_policy": "all_observed_proxy",
+        "fee_scenario": "training_median_fee",
+        "net_mean_return": mean,
+        "net_median_return_unweighted": median,
+        "insolvent_under_capital_model": insolvent,
+    }
+
+
+def test_backtest_acceptance_requires_zero_as_the_only_viable_delay() -> None:
+    supported = backtest_acceptance_decision(
+        [
+            _acceptance_row(0, 0.2, 0.1, False),
+            _acceptance_row(1, 0.1, -0.1, False),
+            _acceptance_row(2, 0.3, 0.1, True),
+        ]
+    )
+    assert supported["decision"] == "supported_only_requested_delay_zero_is_viable"
+    assert supported["observed_viable_delays"] == [0]
+
+    rejected = backtest_acceptance_decision(
+        [
+            _acceptance_row(0, 0.2, 0.1, False),
+            _acceptance_row(1, 0.1, 0.01, False),
+            _acceptance_row(2, -0.1, -0.1, False),
+        ]
+    )
+    assert rejected["decision"] == "rejected_viable_delay_set_differs_from_zero_only"
+    assert rejected["observed_viable_delays"] == [0, 1]
+
+    with pytest.raises(ValueError, match="exactly"):
+        backtest_acceptance_decision([_acceptance_row(0, 0.2, 0.1, False)])

@@ -7,24 +7,24 @@
 <text x="615" y="98" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700" fill="#334155">delay 2</text>
 <text x="32" y="166" font-family="Arial" font-size="14" fill="#334155">Gross</text>
 <rect x="200" y="135" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.800"/>
-<text x="275" y="169" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+40.38%</text>
-<rect x="370" y="135" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.270"/>
-<text x="445" y="169" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+5.83%</text>
-<rect x="540" y="135" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.702"/>
-<text x="615" y="169" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+33.97%</text>
+<text x="275" y="169" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+82.16%</text>
+<rect x="370" y="135" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.203"/>
+<text x="445" y="169" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+2.99%</text>
+<rect x="540" y="135" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.483"/>
+<text x="615" y="169" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+40.16%</text>
 <text x="32" y="248" font-family="Arial" font-size="14" fill="#334155">Training median fees</text>
-<rect x="200" y="217" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.688"/>
-<text x="275" y="251" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+33.08%</text>
-<rect x="370" y="217" width="150" height="54" rx="7" fill="#dc2626" fill-opacity="0.203"/>
-<text x="445" y="251" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">-1.47%</text>
-<rect x="540" y="217" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.589"/>
-<text x="615" y="251" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+26.66%</text>
+<rect x="200" y="217" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.745"/>
+<text x="275" y="251" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+74.86%</text>
+<rect x="370" y="217" width="150" height="54" rx="7" fill="#dc2626" fill-opacity="0.213"/>
+<text x="445" y="251" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">-4.32%</text>
+<rect x="540" y="217" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.428"/>
+<text x="615" y="251" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+32.86%</text>
 <text x="32" y="330" font-family="Arial" font-size="14" fill="#334155">Training p90 fees</text>
-<rect x="200" y="299" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.514"/>
-<text x="275" y="333" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+21.76%</text>
-<rect x="370" y="299" width="150" height="54" rx="7" fill="#dc2626" fill-opacity="0.376"/>
-<text x="445" y="333" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">-12.79%</text>
-<rect x="540" y="299" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.416"/>
-<text x="615" y="333" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+15.35%</text>
+<rect x="200" y="299" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.659"/>
+<text x="275" y="333" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+63.54%</text>
+<rect x="370" y="299" width="150" height="54" rx="7" fill="#dc2626" fill-opacity="0.298"/>
+<text x="445" y="333" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">-15.63%</text>
+<rect x="540" y="299" width="150" height="54" rx="7" fill="#16a34a" fill-opacity="0.343"/>
+<text x="615" y="333" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#0f172a">+21.54%</text>
 <text x="32" y="389" font-family="Arial" font-size="12" fill="#64748b">Population weighting expands each sampled negative by 25x. Fees are wallet-training-only.</text>
 </svg>

@@ -1,7 +1,6 @@
 """Validation-only replica backtest with fixed wallet-derived behavior parameters."""
 
 import json
-from datetime import UTC, datetime
 from pathlib import Path
 
 import duckdb
@@ -15,16 +14,20 @@ from solana_sniper.baseline import (
     _population_weights,
 )
 from solana_sniper.boosting import BOOSTING_PARAMETERS, build_boosting_model
+from solana_sniper.entry_prices import validate_entry_prices
 from solana_sniper.guardrails import assert_feature_names_are_pre_decision
 from solana_sniper.manifest import append_experiment, git_head, sha256_file
 from solana_sniper.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, REPORT_DIR, project_relative
 from solana_sniper.splits import chronological_train_validation_test_split
 
 CLASSIFICATION_PATH = PROCESSED_DIR / "classification_dataset_creator_history.parquet"
+CLASSIFICATION_MANIFEST_PATH = PROCESSED_DIR / "creator_history_manifest.json"
 ENTRY_PRICES_PATH = PROCESSED_DIR / "replica_entry_prices.parquet"
+ENTRY_PRICES_METRICS_PATH = REPORT_DIR / "entry_prices_metrics.json"
 WALLET_PATH = RAW_DIR / "wallet" / "5brv79e_activity.parquet"
 TRADES_PATH = RAW_DIR / "june" / "pumpfun_trades.parquet"
 METRICS_PATH = REPORT_DIR / "replica_validation_backtest.json"
+REPORT_PATH = REPORT_DIR.parent / "replica_validation_backtest.md"
 FIGURE_PATH = PROJECT_ROOT / "reports" / "figures" / "replica_validation_backtest.svg"
 HOLD_SECONDS = 6
 JUNE_START = pd.Timestamp("2026-06-01T00:00:00Z")
@@ -262,7 +265,40 @@ def validate_backtest_rows(frame: pd.DataFrame, outcome_cutoff_epoch: int) -> No
         raise ValueError("Backtest returns are not finite")
 
 
-def write_backtest_svg(results: list[dict[str, object]], path: Path) -> None:
+def backtest_acceptance_decision(results: list[dict[str, object]]) -> dict[str, object]:
+    """Require median-fee viability at requested delay zero and nowhere else."""
+    primary = [
+        row
+        for row in results
+        if row["execution_policy"] == "all_observed_proxy"
+        and row["fee_scenario"] == "training_median_fee"
+    ]
+    if {int(row["requested_delay_slots"]) for row in primary} != {0, 1, 2}:
+        raise ValueError("primary results must contain exactly the 0/1/2-slot rows")
+    viable_delays = [
+        int(row["requested_delay_slots"])
+        for row in primary
+        if float(row["net_mean_return"]) > 0
+        and float(row["net_median_return_unweighted"]) > 0
+        and not bool(row["insolvent_under_capital_model"])
+    ]
+    supported = viable_delays == [0]
+    return {
+        "decision": (
+            "supported_only_requested_delay_zero_is_viable"
+            if supported
+            else "rejected_viable_delay_set_differs_from_zero_only"
+        ),
+        "viability_definition": (
+            "training-median-fee all-observed net weighted mean and unweighted median are "
+            "strictly positive and the fixed-notional capital path remains solvent"
+        ),
+        "required_viable_delays": [0],
+        "observed_viable_delays": viable_delays,
+    }
+
+
+def render_backtest_svg(results: list[dict[str, object]]) -> str:
     rows = [row for row in results if row["execution_policy"] == "all_observed_proxy"]
     fee_order = ["gross", "training_median_fee", "training_p90_fee"]
     by_key = {(str(row["fee_scenario"]), int(row["requested_delay_slots"])): row for row in rows}
@@ -316,29 +352,84 @@ def write_backtest_svg(results: list[dict[str, object]], path: Path) -> None:
             "</svg>",
         ]
     )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(elements) + "\n", encoding="utf-8")
+    return "\n".join(elements) + "\n"
 
 
 def run_validation_backtest() -> dict[str, object]:
-    for path in (CLASSIFICATION_PATH, ENTRY_PRICES_PATH, WALLET_PATH, TRADES_PATH):
+    required_paths = (
+        CLASSIFICATION_PATH,
+        CLASSIFICATION_MANIFEST_PATH,
+        ENTRY_PRICES_PATH,
+        ENTRY_PRICES_METRICS_PATH,
+        WALLET_PATH,
+        TRADES_PATH,
+    )
+    for path in required_paths:
         if not path.exists():
             raise FileNotFoundError(path)
 
     frame = pd.read_parquet(CLASSIFICATION_PATH)
+    required_columns = {
+        "label",
+        "decision_time",
+        "token_address",
+        "tx_hash",
+        "decision_hour_utc",
+        "decision_weekday_utc",
+        "creator_prior_deploy_count",
+        "creator_prior_active_slot_count",
+        "creator_observed_age_seconds",
+        "creator_seconds_since_previous_deploy",
+    }
+    missing_columns = sorted(required_columns - set(frame.columns))
+    if missing_columns:
+        raise ValueError(f"classification dataset is missing columns: {missing_columns}")
+    if frame["token_address"].duplicated().any():
+        raise ValueError("classification token_address must be unique")
+    if frame["label"].nunique() != 2:
+        raise ValueError("classification dataset must contain both classes")
+    classification_sha256 = sha256_file(CLASSIFICATION_PATH)
+    history_manifest = json.loads(CLASSIFICATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+    if history_manifest["sha256"] != classification_sha256:
+        raise ValueError("strict-history manifest hash does not match classification dataset")
+    if history_manifest["rows"] != len(frame):
+        raise ValueError("strict-history manifest row count does not match")
+    if history_manifest["unique_tokens"] != frame["token_address"].nunique():
+        raise ValueError("strict-history manifest unique-token count does not match")
+    if history_manifest["strict_time_violations"] != 0:
+        raise ValueError("strict-history manifest reports time-boundary violations")
+    canonical_time = pd.to_datetime(frame["decision_time"], utc=True)
+    utc_hour_mismatches = int(frame["decision_hour_utc"].ne(canonical_time.dt.hour).sum())
+    utc_weekday_mismatches = int(
+        frame["decision_weekday_utc"].ne(canonical_time.dt.dayofweek).sum()
+    )
+    if utc_hour_mismatches or utc_weekday_mismatches:
+        raise ValueError("classification dataset contains noncanonical UTC clock features")
+
     positive_times = frame.loc[frame["label"] == 1, "decision_time"]
-    frame = frame.loc[frame["decision_time"].between(positive_times.min(), positive_times.max())]
+    active = frame.loc[
+        frame["decision_time"].between(positive_times.min(), positive_times.max())
+    ].copy()
     numeric_features = [
         column
-        for column in frame.select_dtypes(include=["number", "bool"]).columns
+        for column in active.select_dtypes(include=["number", "bool"]).columns
         if column not in NON_FEATURE_COLUMNS
     ]
     assert_feature_names_are_pre_decision(numeric_features)
     split = chronological_train_validation_test_split(
-        frame, time_column="decision_time", validation_fraction=0.2, test_fraction=0.2
+        active, time_column="decision_time", validation_fraction=0.2, test_fraction=0.2
     )
+    for name, partition in (
+        ("train", split.train),
+        ("validation", split.validation),
+        ("final_holdout", split.test),
+    ):
+        if partition["label"].nunique() != 2:
+            raise ValueError(f"{name} partition does not contain both classes")
     train_end = split.train["decision_time"].max()
     final_holdout_start = split.test["decision_time"].min()
+    if not split.validation["decision_time"].max() < final_holdout_start:
+        raise AssertionError("validation overlaps the final holdout")
     outcome_cutoff_epoch = int(final_holdout_start.timestamp())
 
     model = build_boosting_model()
@@ -365,6 +456,23 @@ def run_validation_backtest() -> dict[str, object]:
     if behavior["hold_seconds"]["median"] != HOLD_SECONDS:
         raise ValueError("Training-only median hold does not match the frozen six-second rule")
     entry_prices = pd.read_parquet(ENTRY_PRICES_PATH)
+    validate_entry_prices(entry_prices, int(entry_prices["token_address"].nunique()))
+    entry_metrics = json.loads(ENTRY_PRICES_METRICS_PATH.read_text(encoding="utf-8"))
+    entry_prices_sha256 = sha256_file(ENTRY_PRICES_PATH)
+    if entry_metrics["classification_sha256"] != classification_sha256:
+        raise ValueError("entry-price audit is tied to a different classification dataset")
+    if entry_metrics["output_sha256"] != entry_prices_sha256:
+        raise ValueError("entry-price audit hash does not match the entry-price table")
+    if entry_metrics["trades_sha256"] != sha256_file(TRADES_PATH):
+        raise ValueError("entry-price audit trades hash does not match the source")
+    if entry_metrics["rows"] != len(entry_prices):
+        raise ValueError("entry-price audit row count does not match")
+    entry_token_times = entry_prices.drop_duplicates("token_address").set_index("token_address")[
+        "decision_time"
+    ]
+    classification_token_times = frame.set_index("token_address")["decision_time"]
+    if not entry_token_times.equals(classification_token_times.loc[entry_token_times.index]):
+        raise ValueError("entry-price decision times differ from corrected classification times")
     attempts = selected.merge(entry_prices, on="token_address", how="left", validate="one_to_many")
     expected_attempts = len(selected) * 3
     if len(attempts) != expected_attempts:
@@ -433,24 +541,35 @@ def run_validation_backtest() -> dict[str, object]:
                     }
                 )
 
-    write_backtest_svg(results, FIGURE_PATH)
+    acceptance = backtest_acceptance_decision(results)
     metrics: dict[str, object] = {
-        "generated_at_utc": datetime.now(UTC).isoformat(),
-        "experiment": "replica_validation_fixed_training_wallet_hold",
+        "experiment": "corrected_raw_signer_history_replica_validation",
         "single_hypothesis": (
-            "the training-only target-wallet median hold of six seconds can serve as a fixed "
-            "replica exit rule under 0/1/2-slot entry and observed training fee sensitivity"
+            "after UTC remediation the raw signer-delta plus strict-history selector with the "
+            "training-only six-second hold and fees is viable only at requested delay zero"
         ),
+        "predeclared_acceptance_criterion": (
+            "under all-observed execution and training-median fees, viability requires positive "
+            "weighted mean, positive unweighted median, and solvency; the viable delay set must "
+            "equal only requested delay zero"
+        ),
+        "acceptance": acceptance,
         "development_status": "validation_diagnostic_not_independent_final_estimate",
         "final_holdout_evaluated": False,
+        "final_holdout_status": "sealed_no_predictions_generated",
         "classification_dataset": project_relative(CLASSIFICATION_PATH),
-        "classification_dataset_sha256": sha256_file(CLASSIFICATION_PATH),
+        "classification_dataset_sha256": classification_sha256,
+        "classification_manifest": project_relative(CLASSIFICATION_MANIFEST_PATH),
+        "classification_manifest_sha256": sha256_file(CLASSIFICATION_MANIFEST_PATH),
         "entry_prices": project_relative(ENTRY_PRICES_PATH),
-        "entry_prices_sha256": sha256_file(ENTRY_PRICES_PATH),
+        "entry_prices_sha256": entry_prices_sha256,
+        "entry_prices_metrics": project_relative(ENTRY_PRICES_METRICS_PATH),
+        "entry_prices_metrics_sha256": sha256_file(ENTRY_PRICES_METRICS_PATH),
         "wallet_source": project_relative(WALLET_PATH),
         "wallet_source_sha256": sha256_file(WALLET_PATH),
         "trades_source": project_relative(TRADES_PATH),
         "trades_source_sha256": sha256_file(TRADES_PATH),
+        "source_role": "post_deployment_prices_used_only_for_backtest_labels_and_marks",
         "model_hyperparameters": BOOSTING_PARAMETERS,
         "feature_names": numeric_features,
         "train_end_utc": train_end.isoformat(),
@@ -460,6 +579,9 @@ def run_validation_backtest() -> dict[str, object]:
         "max_predicted_decision_time_utc": development["decision_time"].max().isoformat(),
         "max_selected_decision_time_utc": selected["decision_time"].max().isoformat(),
         "max_backtest_outcome_epoch": int(marked["exit_block_time"].max()),
+        "max_backtest_outcome_utc": pd.Timestamp(
+            int(marked["exit_block_time"].max()), unit="s", tz="UTC"
+        ).isoformat(),
         "classifier_validation_metrics": classifier_metrics,
         "classifier_operating_point": operating_point,
         "development_june_rows": int(len(development)),
@@ -475,10 +597,28 @@ def run_validation_backtest() -> dict[str, object]:
             "max": int(marked["mark_staleness_seconds"].max()),
         },
         "backtest_results": results,
-        "figure": project_relative(FIGURE_PATH),
-        "figure_sha256": sha256_file(FIGURE_PATH),
+        "schema": {
+            "classification_rows": int(len(frame)),
+            "classification_active_rows": int(len(active)),
+            "classification_unique_tokens": int(frame["token_address"].nunique()),
+            "classification_positive_rows": int((frame["label"] == 1).sum()),
+            "classification_negative_rows": int((frame["label"] == 0).sum()),
+            "strict_time_violations": int(history_manifest["strict_time_violations"]),
+            "utc_hour_mismatch_rows": utc_hour_mismatches,
+            "utc_weekday_mismatch_rows": utc_weekday_mismatches,
+            "entry_price_rows": int(len(entry_prices)),
+            "entry_price_unique_tokens": int(entry_prices["token_address"].nunique()),
+            "entry_price_unique_token_delay_keys": int(
+                entry_prices[["token_address", "requested_delay_slots"]].drop_duplicates().shape[0]
+            ),
+            "entry_price_decision_time_mismatch_rows": 0,
+            "backtest_unique_token_delay_keys": int(
+                marked[["token_address", "requested_delay_slots"]].drop_duplicates().shape[0]
+            ),
+        },
         "code_parent_commit": git_head(),
         "limitations": [
+            "The first observed trade at or after each target slot is an optimistic entry proxy.",
             "The six-second exit is a last-trade mark at or before the target time, "
             "not a proven executable sell fill.",
             "The operating threshold is selected on this validation partition, so this "
@@ -489,16 +629,140 @@ def run_validation_backtest() -> dict[str, object]:
             "can exceed requested delay.",
         ],
     }
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
-    metrics["metrics_path"] = project_relative(METRICS_PATH)
-    metrics["metrics_sha256"] = sha256_file(METRICS_PATH)
-    append_experiment(metrics)
     return metrics
 
 
+def render_report(metrics: dict[str, object]) -> str:
+    classifier = metrics["classifier_validation_metrics"]
+    acceptance = metrics["acceptance"]
+    decision_text = (
+        "The corrected development result supports the frozen hypothesis: requested delay zero "
+        "is the only viable delay under the predeclared definition."
+        if acceptance["decision"] == "supported_only_requested_delay_zero_is_viable"
+        else "The corrected development result rejects the frozen zero-only viability hypothesis."
+    )
+    scenario_labels = {
+        "gross": "gross (0 bps)",
+        "training_median_fee": "training median",
+        "training_p90_fee": "training p90",
+    }
+    policy_labels = {
+        "all_observed_proxy": "all observed",
+        "exact_target_slot_only": "exact target slot",
+    }
+    rows = []
+    for result in metrics["backtest_results"]:
+        if (
+            result["execution_policy"] == "exact_target_slot_only"
+            and result["fee_scenario"] != "training_median_fee"
+        ):
+            continue
+        rows.append(
+            "| {delay} | {policy} | {coverage:.2%} | {actual:.0f} / {p90:.0f} | {fees} "
+            "({bps:.2f} bps) | {mean:+.2%} | {median:+.2%} | {hit:.2%} | {mdd:.2%} | "
+            "{insolvent} |".format(
+                delay=result["requested_delay_slots"],
+                policy=policy_labels[str(result["execution_policy"])],
+                coverage=result["coverage_rate_population_weighted"],
+                actual=result["actual_delay_slots"]["median"],
+                p90=result["actual_delay_slots"]["p90"],
+                fees=scenario_labels[str(result["fee_scenario"])],
+                bps=result["fee_bps"],
+                mean=result["net_mean_return"],
+                median=result["net_median_return_unweighted"],
+                hit=result["net_hit_rate"],
+                mdd=result["max_drawdown_fraction"],
+                insolvent="yes" if result["insolvent_under_capital_model"] else "no",
+            )
+        )
+    schema = metrics["schema"]
+    behavior = metrics["behavior_parameters"]
+    reproduction = metrics.get("reproduction_verification", {})
+    table_header = (
+        "| Requested delay | Execution | Weighted coverage | Actual delay median / p90 | "
+        "Fee scenario | Net mean | Net median | Hit rate | Max drawdown | Insolvent |"
+    )
+    return f"""# Corrected six-second replica backtest (development validation only)
+
+## Decision
+
+{decision_text} Viability means a strictly positive population-weighted mean, a strictly positive
+unweighted median, and a solvent fixed-notional capital path under training-median fees. The
+observed viable delay set is `{acceptance["observed_viable_delays"]}`. This is a validation
+diagnostic, not an independent profitability estimate, and the final chronological holdout remains
+sealed.
+
+The raw deployment-signer balance delta plus strict prior signer-history classifier has
+population-adjusted PR-AUC {classifier["population_adjusted_pr_auc"]:.5f}, precision
+{classifier["precision"]:.4f}, recall {classifier["recall"]:.4f}, and F1
+{classifier["f1"]:.4f} at threshold {classifier["threshold"]:.6f}. It selects
+{metrics["selected_sample_rows"]:,} sampled June validation deployments (population weight
+{metrics["selected_population_weight"]:,.0f}).
+
+## Frozen behavior and execution
+
+- Wallet events no later than the classifier train end determine the six-second median hold,
+  USD {behavior["first_buy_notional_usd"]["median"]:,.2f} median first-buy notional,
+  {behavior["fee_bps"]["roundtrip_median"]:.2f} bps median round-trip fees, and
+  {behavior["fee_bps"]["roundtrip_p90"]:.2f} bps p90 round-trip fees.
+- Entry is the first observed trade at or after deployment slot plus 0/1/2, excluding the
+  deployment transaction. `all observed` may fill later than requested; `exact target slot`
+  conditions on a trade existing in the target slot.
+- Exit is the last observed mark at or before entry time plus six seconds. Post-deployment trades
+  are used only for entry/exit marks and returns, never as classifier features.
+
+{table_header}
+|---:|:---|---:|:---:|:---|---:|---:|---:|---:|:---:|
+{chr(10).join(rows)}
+
+![Corrected fee-sensitive replica returns](figures/replica_validation_backtest.svg)
+
+## Boundaries, integrity, and limitations
+
+- Corrected classification dataset SHA-256: `{metrics["classification_dataset_sha256"]}`;
+  {schema["classification_rows"]:,} rows, {schema["classification_unique_tokens"]:,} unique
+  tokens, zero strict-history violations, and zero UTC clock mismatches.
+- Rebuilt entry-price SHA-256: `{metrics["entry_prices_sha256"]}`;
+  {schema["entry_price_rows"]:,} unique token-delay rows and zero corrected-time mismatches.
+- Validation ends `{metrics["validation_end_utc"]}`; final holdout starts
+  `{metrics["final_holdout_start_utc"]}`; latest selected deployment is
+  `{metrics["max_selected_decision_time_utc"]}` and latest outcome mark is
+  `{metrics["max_backtest_outcome_utc"]}`.
+- Deterministic complete-dictionary reproduction: `{reproduction.get("verified", False)}` over
+  {reproduction.get("run_count", 0)} runs. Code parent: `{metrics["code_parent_commit"]}`.
+- The entry and exit prices are optimistic observed marks, not guaranteed size-aware fills.
+  Population weighting cannot recover path dependence for omitted negatives, and the operating
+  threshold was selected on this same validation partition.
+"""
+
+
 def main() -> None:
-    print(json.dumps(run_validation_backtest(), indent=2))
+    metrics = run_validation_backtest()
+    reproduced = run_validation_backtest()
+    if reproduced != metrics:
+        raise AssertionError("deterministic replica backtest rerun did not match")
+    metrics["reproduction_verification"] = {
+        "verified": True,
+        "run_count": 2,
+        "comparison": "complete_metrics_dictionary_exact_match",
+    }
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+    REPORT_PATH.write_text(render_report(metrics), encoding="utf-8")
+    FIGURE_PATH.write_text(render_backtest_svg(metrics["backtest_results"]), encoding="utf-8")
+    append_experiment(
+        {
+            **metrics,
+            "metrics_path": project_relative(METRICS_PATH),
+            "metrics_sha256": sha256_file(METRICS_PATH),
+            "report_path": project_relative(REPORT_PATH),
+            "report_sha256": sha256_file(REPORT_PATH),
+            "figure_path": project_relative(FIGURE_PATH),
+            "figure_sha256": sha256_file(FIGURE_PATH),
+        }
+    )
+    print(json.dumps(metrics, indent=2))
 
 
 if __name__ == "__main__":
