@@ -1,8 +1,10 @@
+import os
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
-PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
+DATA_ROOT = Path(os.environ.get("SOLANA_SNIPER_DATA_ROOT", PROJECT_ROOT / "data")).resolve()
+RAW_DIR = DATA_ROOT / "raw"
+PROCESSED_DIR = DATA_ROOT / "processed"
 REPORT_DIR = PROJECT_ROOT / "reports" / "generated"
 MANIFEST_PATH = PROJECT_ROOT / "experiments" / "manifest.jsonl"
 

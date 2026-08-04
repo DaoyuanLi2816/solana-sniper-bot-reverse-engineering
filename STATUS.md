@@ -66,10 +66,11 @@ position-lag candidate is rejected; the raw zero-slot result is only an optimist
 - [x] Writeup rewritten under 3,000 words with only corrected claims
 - [x] Stale campaign status removed
 - [x] Cover image generated and checked
-- [ ] Public reproducibility notebook created and run end to end
+- [x] Public reproducibility notebook created, run end to end, and audited for embedded data
 - [ ] Public repository created with lock, commands, hashes, and negative results
 - [ ] Kaggle Track, Media Gallery, Public Notebook, and Project Link attached
 - [ ] Initial Writeup submitted and remote ID, status, and URL recorded
 
-Current local commit containing the corrected execution evidence is `60bcae0`. The submission is
-not yet valid until all unchecked items are complete and Kaggle shows `Submitted`.
+Corrected execution evidence is frozen in local commit `60bcae0`; the writeup and cover are frozen
+in `2c2823f`. The submission is not yet valid until all unchecked items are complete and Kaggle
+shows `Submitted`.
