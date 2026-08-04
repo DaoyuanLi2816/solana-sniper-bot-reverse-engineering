@@ -96,3 +96,17 @@ definition. The positive delay-2 mean is tail-driven and must not be presented a
 profitability. These are validation diagnostics based on optimistic observed price marks, not
 guaranteed fills or an independent estimate. Detailed evidence is in
 [replica_validation_backtest.md](replica_validation_backtest.md); the final holdout remains sealed.
+
+## Revalidated priority-fee intensity after remediation
+
+Replacing absolute deployment priority fee with priority fee per consumed compute unit was rerun
+twice on the repaired raw signer-delta plus strict-history baseline. The complete result dictionary
+matched across runs. Intensity-minus-absolute PR-AUC was -0.00357, +0.00088, and -0.00228 in the
+three expanding folds, so folds 1 and 3 exceed the predeclared 0.002 loss margin. Standard
+validation also fell from PR-AUC 0.07028 to 0.06949; the intensity operating point has precision
+0.1146, recall 0.2188, and F1 0.1504 at threshold 0.928165. The intensity replacement is rejected,
+and absolute priority fee remains in the current selector. Fee per consumed compute unit may be
+reported descriptively as a realized deployment-transaction urgency proxy, but consumed compute
+is not the requested compute limit and the proxy must not be claimed as a classifier improvement.
+Detailed evidence is in [priority_fee_intensity.md](priority_fee_intensity.md); the final holdout
+remains sealed.

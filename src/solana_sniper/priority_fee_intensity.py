@@ -12,13 +12,6 @@ from solana_sniper.creator_history_stability import (
     _validation_metrics,
     expanding_time_folds,
 )
-from solana_sniper.deployment_outflow_proxy import (
-    PROXY_FEATURE as OUTFLOW_FEATURE,
-)
-from solana_sniper.deployment_outflow_proxy import (
-    RAW_FEATURE as RAW_SIGNER_FEATURE,
-)
-from solana_sniper.deployment_outflow_proxy import add_deployment_outflow_proxy
 from solana_sniper.guardrails import assert_feature_names_are_pre_decision
 from solana_sniper.manifest import append_experiment, git_head, sha256_file
 from solana_sniper.paths import PROCESSED_DIR, REPORT_DIR, project_relative
@@ -27,6 +20,8 @@ from solana_sniper.splits import chronological_train_validation_test_split
 RAW_PRIORITY_FEATURE = "priority_fee_lamports"
 INTENSITY_FEATURE = "priority_fee_lamports_per_compute_unit"
 COMPUTE_FEATURE = "compute_units"
+RAW_SIGNER_FEATURE = "signer_lamport_delta"
+HISTORY_MANIFEST_NAME = "creator_history_manifest.json"
 NONINFERIORITY_MARGIN = 0.002
 
 
@@ -89,6 +84,12 @@ def run_priority_intensity_experiment(dataset_path: Path) -> dict[str, object]:
         "tx_fee_lamports",
         RAW_PRIORITY_FEATURE,
         COMPUTE_FEATURE,
+        "decision_hour_utc",
+        "decision_weekday_utc",
+        "creator_prior_deploy_count",
+        "creator_prior_active_slot_count",
+        "creator_observed_age_seconds",
+        "creator_seconds_since_previous_deploy",
     }
     missing = sorted(required - set(frame.columns))
     if missing:
@@ -101,8 +102,26 @@ def run_priority_intensity_experiment(dataset_path: Path) -> dict[str, object]:
     positive_times = frame.loc[frame["label"] == 1, "decision_time"]
     active_start = positive_times.min()
     active_end = positive_times.max()
+    dataset_sha256 = sha256_file(dataset_path)
+    history_manifest_path = dataset_path.parent / HISTORY_MANIFEST_NAME
+    history_manifest = json.loads(history_manifest_path.read_text(encoding="utf-8"))
+    if history_manifest["sha256"] != dataset_sha256:
+        raise ValueError("strict-history manifest hash does not match the dataset")
+    if history_manifest["rows"] != len(frame):
+        raise ValueError("strict-history manifest row count does not match")
+    if history_manifest["unique_tokens"] != frame["token_address"].nunique():
+        raise ValueError("strict-history manifest unique-token count does not match")
+    if history_manifest["strict_time_violations"] != 0:
+        raise ValueError("strict-history manifest reports time-boundary violations")
+    canonical_time = pd.to_datetime(frame["decision_time"], utc=True)
+    utc_hour_mismatches = int(frame["decision_hour_utc"].ne(canonical_time.dt.hour).sum())
+    utc_weekday_mismatches = int(
+        frame["decision_weekday_utc"].ne(canonical_time.dt.dayofweek).sum()
+    )
+    if utc_hour_mismatches or utc_weekday_mismatches:
+        raise ValueError("dataset contains noncanonical UTC clock features")
+
     active = frame.loc[frame["decision_time"].between(active_start, active_end)].copy()
-    active = add_deployment_outflow_proxy(active)
     active = add_priority_fee_intensity(active)
     split = chronological_train_validation_test_split(
         active,
@@ -112,11 +131,9 @@ def run_priority_intensity_experiment(dataset_path: Path) -> dict[str, object]:
     )
     pretest = pd.concat([split.train, split.validation], ignore_index=True)
     all_numeric = _numeric_features(pretest)
-    baseline_features = [
-        feature for feature in all_numeric if feature not in {RAW_SIGNER_FEATURE, INTENSITY_FEATURE}
-    ]
-    if OUTFLOW_FEATURE not in baseline_features or RAW_PRIORITY_FEATURE not in baseline_features:
-        raise ValueError("best proxy baseline features are missing")
+    baseline_features = [feature for feature in all_numeric if feature != INTENSITY_FEATURE]
+    if RAW_SIGNER_FEATURE not in baseline_features or RAW_PRIORITY_FEATURE not in baseline_features:
+        raise ValueError("current raw signer baseline features are missing")
     intensity_features = [
         INTENSITY_FEATURE if feature == RAW_PRIORITY_FEATURE else feature
         for feature in baseline_features
@@ -165,12 +182,19 @@ def run_priority_intensity_experiment(dataset_path: Path) -> dict[str, object]:
         "experiment": "deployment_priority_fee_intensity",
         "single_hypothesis": (
             "priority fee per consumed compute unit is a more stable deployment-urgency "
-            "feature than absolute priority fee on the fee-adjusted outflow baseline"
+            "feature than absolute priority fee on the raw signer plus strict-history baseline"
         ),
         "decision": intensity_decision(fold_deltas, standard_delta),
+        "predeclared_acceptance_criterion": (
+            "claim improvement only if intensity minus absolute PR-AUC is strictly positive in "
+            "all three expanding folds and standard validation; retain only semantically if "
+            "every loss is at most 0.002; otherwise reject"
+        ),
         "predeclared_noninferiority_margin_pr_auc": NONINFERIORITY_MARGIN,
         "dataset": project_relative(dataset_path),
-        "dataset_sha256": sha256_file(dataset_path),
+        "dataset_sha256": dataset_sha256,
+        "creator_history_manifest": project_relative(history_manifest_path),
+        "creator_history_manifest_sha256": sha256_file(history_manifest_path),
         "code_parent_commit": git_head(),
         "schema": {
             "rows": len(frame),
@@ -181,6 +205,9 @@ def run_priority_intensity_experiment(dataset_path: Path) -> dict[str, object]:
             "positive_rows": int((frame["label"] == 1).sum()),
             "negative_rows": int((frame["label"] == 0).sum()),
             "nonpositive_compute_rows": int((frame[COMPUTE_FEATURE] <= 0).sum()),
+            "strict_time_violations": int(history_manifest["strict_time_violations"]),
+            "utc_hour_mismatch_rows": utc_hour_mismatches,
+            "utc_weekday_mismatch_rows": utc_weekday_mismatches,
         },
         "feature_definition": {
             "name": INTENSITY_FEATURE,
@@ -203,6 +230,17 @@ def run_priority_intensity_experiment(dataset_path: Path) -> dict[str, object]:
         "feature_replacement": {
             "removed": RAW_PRIORITY_FEATURE,
             "added": INTENSITY_FEATURE,
+        },
+        "baseline_definition": {
+            "deployment_balance_feature": RAW_SIGNER_FEATURE,
+            "history_family": [
+                "creator_prior_deploy_count",
+                "creator_prior_active_slot_count",
+                "creator_observed_age_seconds",
+                "creator_seconds_since_previous_deploy",
+            ],
+            "outflow_proxy_used": False,
+            "post_deployment_inputs": "none",
         },
         "hyperparameters": BOOSTING_PARAMETERS,
         "expanding_folds": fold_results,
@@ -298,8 +336,8 @@ def render_report(metrics: dict[str, object]) -> str:
 
 ## Decision
 
-{decision_text} This is a two-run-reproduced development result, not an independent final
-estimate; the final chronological holdout remains sealed.
+{decision_text} This is a two-run-reproduced post-UTC-remediation development result, not an
+independent final estimate; the final chronological holdout remains sealed.
 
 | Fold | Validation period | Absolute PR-AUC | Intensity PR-AUC | Delta | Precision | Recall | F1 |
 |---:|---|---:|---:|---:|---:|---:|---:|
@@ -331,7 +369,9 @@ requested compute limit, so this is a realized transaction-urgency proxy rather 
 - Rows: {metrics["schema"]["rows"]:,}; active rows: {metrics["schema"]["active_rows"]:,}; unique
   tokens: {metrics["schema"]["unique_tokens"]:,}; nonpositive compute rows:
   {metrics["schema"]["nonpositive_compute_rows"]}.
-- Exactly one feature is replaced on the retained fee-adjusted outflow baseline.
+- Exactly one feature is replaced on the current raw signer-delta plus strict-history baseline;
+  the fee-adjusted outflow proxy is not used.
+- Strict-history violations and UTC hour/weekday mismatches are all zero.
 - Two complete deterministic runs matched the metrics dictionary exactly.
 - Maximum evaluated time: `{metrics["max_evaluated_time"]}`.
 - Final holdout starts: `{metrics["final_holdout_start"]}`; no holdout predictions were generated.
