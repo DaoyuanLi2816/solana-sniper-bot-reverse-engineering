@@ -1,5 +1,14 @@
 {
   "competition_slug": "solana-sniper-bot-reverse-engineering",
+  "track": {
+    "id": 5836,
+    "title": "Sniper Bot Reverse-Engineering & Replica",
+    "prize": {
+      "id": 9123,
+      "title": "1st place",
+      "amount_usd": 1000
+    }
+  },
   "submission_status": "local_mvp_ready_for_publication_not_submitted",
   "writeup": {
     "path": "writeup/draft.md",
@@ -28,7 +37,18 @@
     "contains_local_user_path": false,
     "contains_embedded_competition_data": false,
     "final_holdout_evaluated": false,
-    "remote_url": "https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering/blob/main/notebooks/solana_sniper_reproduction.ipynb"
+    "remote_url": "https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering/blob/main/notebooks/solana_sniper_reproduction.ipynb",
+    "kaggle_companion": {
+      "path": "kaggle/notebook/solana-sniper-public-reproduction.ipynb",
+      "sha256": "753993506278c600208ada3d42191473f31d830efebe9fb2a093242ab621ad8f",
+      "bytes": 9415,
+      "url": "https://www.kaggle.com/code/distiller/solana-sniper-leakage-audited-reproduction",
+      "version": 1,
+      "status": "COMPLETE",
+      "visibility": "PUBLIC",
+      "anonymous_http_status": 200,
+      "contains_competition_rows": false
+    }
   },
   "public_repository": {
     "url": "https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering",

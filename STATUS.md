@@ -14,10 +14,11 @@ Last verified: 2026-08-04 06:30 UTC
 - Our account: no Writeup created or submitted yet
 - Discussion: two existing topics; no new technical or submission guidance
 
-The published prize and team-limit text is inconsistent. The Overview advertises USD 1,000 total,
-while the competition-specific Rules page still contains sponsor placeholders and lists a
-USD 600/300/100 split. The API/UI permits ten team members while the Rules say five; the project
-uses the stricter five-person limit. Competition data may not be publicly redistributed.
+The structured Hackathon Track API resolves the prize as one first-place award of USD 1,000
+(track `5836`, prize `9123`). The competition-specific Rules prose still contains an unfilled
+sponsor placeholder and a stale USD 600/300/100 split. The API/UI permits ten team members while
+the Rules say five; the project uses the stricter five-person limit. Competition data may not be
+publicly redistributed.
 
 ## Current corrected evidence
 
@@ -68,10 +69,13 @@ position-lag candidate is rejected; the raw zero-slot result is only an optimist
 - [x] Cover image generated and checked
 - [x] Public reproducibility notebook created, run end to end, and audited for embedded data
 - [x] Public repository created with lock, commands, hashes, and negative results
+- [x] Kaggle public companion notebook version 1 completed and anonymously reachable
 - [ ] Kaggle Track, Media Gallery, Public Notebook, and Project Link attached
 - [ ] Initial Writeup submitted and remote ID, status, and URL recorded
 
 Corrected execution evidence is frozen in local commit `60bcae0`; the writeup and cover are frozen
 in `2c2823f`; the executed notebook is frozen in `968b20b`. The public repository is
 `https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering`. The submission is not yet
-valid until all unchecked items are complete and Kaggle shows `Submitted`.
+valid until all unchecked items are complete and Kaggle shows `Submitted`. The Kaggle companion is
+`https://www.kaggle.com/code/distiller/solana-sniper-leakage-audited-reproduction` and version 1 is
+`COMPLETE`.
