@@ -1,8 +1,7 @@
 """Fee-adjusted target-wallet PnL and validation-window replica comparison."""
 
+import hashlib
 import json
-from datetime import UTC, datetime
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -15,8 +14,10 @@ from solana_sniper.splits import chronological_train_validation_test_split
 WALLET_PATH = RAW_DIR / "wallet" / "5brv79e_activity.parquet"
 ENTRY_LATENCY_PATH = PROCESSED_DIR / "entry_latency.parquet"
 CLASSIFICATION_PATH = PROCESSED_DIR / "classification_dataset_creator_history.parquet"
+CLASSIFICATION_MANIFEST_PATH = PROCESSED_DIR / "creator_history_manifest.json"
 REPLICA_METRICS_PATH = REPORT_DIR / "position_lag_validation_backtest.json"
 METRICS_PATH = REPORT_DIR / "competitor_fee_pnl.json"
+REPORT_PATH = REPORT_DIR.parent / "competitor_fee_pnl.md"
 FIGURE_PATH = PROJECT_ROOT / "reports" / "figures" / "competitor_fee_pnl.svg"
 NUMERIC_COLUMNS = [
     "cost_usd",
@@ -222,7 +223,7 @@ def summarize_closed_portfolio(frame: pd.DataFrame) -> dict[str, object]:
     }
 
 
-def write_comparison_svg(comparison: dict[str, object], path: Path) -> None:
+def render_comparison_svg(comparison: dict[str, object]) -> str:
     target = comparison["target_wallet"]
     replica = comparison["position_lag_replica"]
     rows = [
@@ -269,30 +270,69 @@ def write_comparison_svg(comparison: dict[str, object], path: Path) -> None:
             "</svg>",
         ]
     )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(elements) + "\n", encoding="utf-8")
+    return "\n".join(elements) + "\n"
 
 
 def run_competitor_pnl() -> dict[str, object]:
-    for path in (WALLET_PATH, ENTRY_LATENCY_PATH, CLASSIFICATION_PATH, REPLICA_METRICS_PATH):
+    for path in (
+        WALLET_PATH,
+        ENTRY_LATENCY_PATH,
+        CLASSIFICATION_PATH,
+        CLASSIFICATION_MANIFEST_PATH,
+        REPLICA_METRICS_PATH,
+    ):
         if not path.exists():
             raise FileNotFoundError(path)
     cashflows, cashflow_audit = build_token_cashflows(pd.read_parquet(WALLET_PATH))
     validate_cashflows(cashflows)
 
     classification = pd.read_parquet(CLASSIFICATION_PATH)
+    if classification.empty or classification["token_address"].duplicated().any():
+        raise ValueError("classification tokens must be nonempty and unique")
+    classification_sha256 = sha256_file(CLASSIFICATION_PATH)
+    history_manifest = json.loads(CLASSIFICATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+    if history_manifest["sha256"] != classification_sha256:
+        raise ValueError("strict-history manifest hash does not match classification dataset")
+    if history_manifest["rows"] != len(classification):
+        raise ValueError("strict-history manifest row count does not match")
+    if history_manifest["unique_tokens"] != classification["token_address"].nunique():
+        raise ValueError("strict-history manifest unique-token count does not match")
+    if history_manifest["strict_time_violations"] != 0:
+        raise ValueError("strict-history manifest reports time-boundary violations")
+    canonical_time = pd.to_datetime(classification["decision_time"], utc=True)
+    utc_hour_mismatches = int(classification["decision_hour_utc"].ne(canonical_time.dt.hour).sum())
+    utc_weekday_mismatches = int(
+        classification["decision_weekday_utc"].ne(canonical_time.dt.dayofweek).sum()
+    )
+    if utc_hour_mismatches or utc_weekday_mismatches:
+        raise ValueError("classification dataset contains noncanonical UTC clock features")
     positive_times = classification.loc[classification["label"] == 1, "decision_time"]
-    classification = classification.loc[
+    active = classification.loc[
         classification["decision_time"].between(positive_times.min(), positive_times.max())
-    ]
+    ].copy()
     split = chronological_train_validation_test_split(
-        classification,
+        active,
         time_column="decision_time",
         validation_fraction=0.2,
         test_fraction=0.2,
     )
     holdout_start = split.test["decision_time"].min()
+    if not split.validation["decision_time"].max() < holdout_start:
+        raise AssertionError("validation overlaps the final holdout")
     latency = pd.read_parquet(ENTRY_LATENCY_PATH)[["token_address", "decision_time"]]
+    if latency.empty or latency["token_address"].duplicated().any():
+        raise ValueError("entry latency must be nonempty and unique by token")
+    positive_token_times = classification.loc[classification["label"] == 1].set_index(
+        "token_address"
+    )["decision_time"]
+    latency_token_times = latency.set_index("token_address")["decision_time"]
+    latency_time_mismatches = int(
+        pd.to_datetime(latency_token_times, utc=True)
+        .ne(pd.to_datetime(positive_token_times.loc[latency_token_times.index], utc=True))
+        .sum()
+    )
+    if latency_time_mismatches:
+        raise ValueError("entry-latency decision times differ from corrected classification times")
     cashflows = cashflows.merge(latency, on="token_address", how="left", validate="one_to_one")
 
     full_period = closed_token_rows(cashflows.loc[cashflows["decision_time"].notna()])
@@ -311,9 +351,18 @@ def run_competitor_pnl() -> dict[str, object]:
     full_metrics = summarize_closed_portfolio(full_period)
     development_metrics = summarize_closed_portfolio(development_safe)
     replica = json.loads(REPLICA_METRICS_PATH.read_text(encoding="utf-8"))
-    replica_median_fee = next(
+    if replica["classification_dataset_sha256"] != classification_sha256:
+        raise ValueError("position-lag report is tied to a different classification dataset")
+    if replica["final_holdout_evaluated"]:
+        raise ValueError("position-lag report unexpectedly evaluates the final holdout")
+    if pd.Timestamp(replica["max_backtest_outcome_utc"]) >= holdout_start:
+        raise ValueError("position-lag outcome crosses the final holdout boundary")
+    replica_median_rows = [
         row for row in replica["backtest_results"] if row["fee_scenario"] == "training_median_fee"
-    )
+    ]
+    if len(replica_median_rows) != 1:
+        raise ValueError("position-lag report must contain one training-median-fee row")
+    replica_median_fee = replica_median_rows[0]
     comparison = {
         "time_window_start_utc": JUNE_START.isoformat(),
         "time_window_end_exclusive_utc": holdout_start.isoformat(),
@@ -342,7 +391,7 @@ def run_competitor_pnl() -> dict[str, object]:
             "population-weighted sampled candidates, so total PnL is not directly comparable"
         ),
     }
-    write_comparison_svg(comparison, FIGURE_PATH)
+    figure_svg = render_comparison_svg(comparison)
 
     hypothesis_supported = (
         development_metrics["net_pnl_usd"] > 0
@@ -350,8 +399,7 @@ def run_competitor_pnl() -> dict[str, object]:
         and development_metrics["net_median_roi"] > 0
     )
     metrics: dict[str, object] = {
-        "generated_at_utc": datetime.now(UTC).isoformat(),
-        "experiment": "target_wallet_recorded_fee_pnl",
+        "experiment": "corrected_target_wallet_recorded_fee_pnl",
         "single_hypothesis": (
             "the target wallet remains profitable after subtracting recorded gas and DEX fees"
         ),
@@ -368,7 +416,9 @@ def run_competitor_pnl() -> dict[str, object]:
         "entry_latency": project_relative(ENTRY_LATENCY_PATH),
         "entry_latency_sha256": sha256_file(ENTRY_LATENCY_PATH),
         "classification_dataset": project_relative(CLASSIFICATION_PATH),
-        "classification_dataset_sha256": sha256_file(CLASSIFICATION_PATH),
+        "classification_dataset_sha256": classification_sha256,
+        "classification_manifest": project_relative(CLASSIFICATION_MANIFEST_PATH),
+        "classification_manifest_sha256": sha256_file(CLASSIFICATION_MANIFEST_PATH),
         "replica_metrics": project_relative(REPLICA_METRICS_PATH),
         "replica_metrics_sha256": sha256_file(REPLICA_METRICS_PATH),
         "cashflow_audit": cashflow_audit,
@@ -384,7 +434,20 @@ def run_competitor_pnl() -> dict[str, object]:
         "development_target_wallet": development_metrics,
         "development_head_to_head": comparison,
         "figure": project_relative(FIGURE_PATH),
-        "figure_sha256": sha256_file(FIGURE_PATH),
+        "figure_sha256": hashlib.sha256(figure_svg.encode("utf-8")).hexdigest(),
+        "schema": {
+            "classification_rows": int(len(classification)),
+            "classification_active_rows": int(len(active)),
+            "classification_unique_tokens": int(classification["token_address"].nunique()),
+            "strict_time_violations": int(history_manifest["strict_time_violations"]),
+            "utc_hour_mismatch_rows": utc_hour_mismatches,
+            "utc_weekday_mismatch_rows": utc_weekday_mismatches,
+            "entry_latency_rows": int(len(latency)),
+            "entry_latency_unique_tokens": int(latency["token_address"].nunique()),
+            "entry_latency_decision_time_mismatch_rows": latency_time_mismatches,
+            "wallet_trade_rows": int(cashflow_audit["trade_rows"]),
+            "wallet_unique_transaction_hashes": int(cashflow_audit["unique_transaction_hashes"]),
+        },
         "code_parent_commit": git_head(),
         "limitations": [
             "Cost and fee fields are accepted as provided; no independent on-chain cash "
@@ -395,16 +458,110 @@ def run_competitor_pnl() -> dict[str, object]:
             "The replica comparison uses different entry sets, sizing, and sampling weights.",
         ],
     }
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
-    metrics["metrics_path"] = project_relative(METRICS_PATH)
-    metrics["metrics_sha256"] = sha256_file(METRICS_PATH)
-    append_experiment(metrics)
     return metrics
 
 
+def render_report(metrics: dict[str, object]) -> str:
+    full = metrics["full_period_target_wallet"]
+    comparison = metrics["development_head_to_head"]
+    target = comparison["target_wallet"]
+    replica = comparison["position_lag_replica"]
+    operating = comparison["classification_overlap_operating_point"]
+    replica_entries = (
+        f"{replica['executed_sample_rows']:,} sampled fills / "
+        f"weight {replica['executed_population_weight']:,.0f}"
+    )
+    return f"""# Corrected target-wallet fee-adjusted PnL and replica comparison
+
+## Cash-flow audit
+
+This run tests whether the target wallet remains profitable after subtracting recorded network
+and DEX fees. It does not tune the classifier. Post-deployment cash flows are behavior and
+evaluation data only; no realized return, price, trade, or PnL field enters the deployment-time
+selector.
+
+The wallet source has {metrics["cashflow_audit"]["trade_rows"]:,} buy/sell rows and the same number
+of unique transaction hashes. Net PnL is `sell receipts - buy costs - gas_usd - dex_usd`.
+Priority and tip fees are not added separately because they are already components of the recorded
+gas field. Closed-token summaries require both buy and sell activity plus an observed close flag.
+
+## Full-period target description
+
+This section is descriptive competitor analysis, not model selection or final-holdout evaluation.
+
+| metric | value |
+|:---|---:|
+| Matched closed tokens | {full["token_rows"]:,} |
+| Gross buy capital | ${full["gross_buy_usd"]:,.0f} |
+| Gross PnL | ${full["gross_pnl_usd"]:,.0f} |
+| Recorded fees | ${full["total_fee_usd"]:,.0f} |
+| Net PnL | ${full["net_pnl_usd"]:,.0f} |
+| Net mean / median ROI | {full["net_mean_roi"]:+.2%} / {full["net_median_roi"]:+.2%} |
+| Net hit rate | {full["net_hit_rate"]:.2%} |
+| Realized max drawdown | {full["max_drawdown_fraction"]:.2%} |
+
+## Strictly pre-holdout comparison
+
+The target window is `{comparison["time_window_start_utc"]}` through
+`{comparison["time_window_end_exclusive_utc"]}` (exclusive). All included target outcomes close
+before that boundary; {metrics["development_outcome_censored_tokens"]} crossing tokens are
+excluded. The corrected classification table has SHA-256
+`{metrics["classification_dataset_sha256"]}` and zero UTC clock mismatches and strict-history
+violations.
+
+| metric | target wallet, recorded fees | executable position-lag replica, median fees |
+|:---|---:|---:|
+| Entry rows | {target["token_rows"]:,} actual buys | {replica_entries} |
+| Net mean ROI | {target["net_mean_return"]:+.2%} | {replica["net_mean_return"]:+.2%} |
+| Net median ROI | {target["net_median_return"]:+.2%} | {replica["net_median_return"]:+.2%} |
+| Hit rate | {target["hit_rate"]:.2%} | {replica["hit_rate"]:.2%} |
+| Max drawdown | {target["max_drawdown_fraction"]:.2%} | {replica["max_drawdown_fraction"]:.2%} |
+| Net PnL | ${target["net_pnl_usd"]:,.0f} actual | ${replica["net_pnl_usd"]:,.0f} weighted proxy |
+
+The overlapping selector operating point is precision {operating["precision"]:.2%}, recall
+{operating["recall"]:.2%}, and F1 {operating["f1"]:.3f}. The target is profitable in aggregate,
+mean, and median after recorded fees. The corrected position-lag replica has a positive weighted
+mean but a negative typical trade and an insolvent tight-capital path, so it is not economically
+equivalent to the target.
+
+![Corrected target-versus-replica comparison](figures/competitor_fee_pnl.svg)
+
+## Decision and limitations
+
+Decision: `{metrics["decision"]}`. This supports the target-wallet fee hypothesis, not replica
+profitability. Target results use actual variable sizing and actual entries; replica results use a
+fixed notional, sampled negatives with population weights, and a transaction-position entry
+proxy. Total dollars are not directly comparable. Cost fields are accepted without independent
+on-chain reconciliation, and realized drawdown books PnL at the final sell rather than marking
+intratrade risk. The classifier and replica final chronological holdout remain sealed.
+"""
+
+
 def main() -> None:
-    print(json.dumps(run_competitor_pnl(), indent=2))
+    first = run_competitor_pnl()
+    second = run_competitor_pnl()
+    if first != second:
+        raise AssertionError("deterministic competitor PnL rerun did not match")
+    metrics = first
+    report = render_report(metrics)
+    figure = render_comparison_svg(metrics["development_head_to_head"])
+    if hashlib.sha256(figure.encode("utf-8")).hexdigest() != metrics["figure_sha256"]:
+        raise AssertionError("competitor figure hash changed between validation and write")
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8", newline="\n")
+    REPORT_PATH.write_text(report, encoding="utf-8", newline="\n")
+    FIGURE_PATH.write_text(figure, encoding="utf-8", newline="\n")
+    append_experiment(
+        {
+            **metrics,
+            "metrics_path": project_relative(METRICS_PATH),
+            "metrics_sha256": sha256_file(METRICS_PATH),
+            "report_path": project_relative(REPORT_PATH),
+            "report_sha256": sha256_file(REPORT_PATH),
+        }
+    )
+    print(json.dumps(metrics, indent=2))
 
 
 if __name__ == "__main__":

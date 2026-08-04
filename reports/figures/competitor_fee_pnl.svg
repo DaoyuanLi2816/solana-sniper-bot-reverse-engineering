@@ -7,17 +7,17 @@
 <text x="32" y="160" font-family="Arial" font-size="14" fill="#334155">Net mean ROI</text>
 <rect x="255" y="126" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.313"/>
 <text x="360" y="163" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+10.71%</text>
-<rect x="520" y="126" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.258"/>
-<text x="625" y="163" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+5.51%</text>
+<rect x="520" y="126" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.286"/>
+<text x="625" y="163" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+8.11%</text>
 <text x="32" y="248" font-family="Arial" font-size="14" fill="#334155">Net median ROI</text>
 <rect x="255" y="214" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.232"/>
 <text x="360" y="251" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+3.05%</text>
-<rect x="520" y="214" width="210" height="58" rx="7" fill="#dc2626" fill-opacity="0.272"/>
-<text x="625" y="251" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">-6.78%</text>
+<rect x="520" y="214" width="210" height="58" rx="7" fill="#dc2626" fill-opacity="0.259"/>
+<text x="625" y="251" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">-5.56%</text>
 <text x="32" y="336" font-family="Arial" font-size="14" fill="#334155">Hit rate</text>
 <rect x="255" y="302" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.800"/>
 <text x="360" y="339" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+56.63%</text>
-<rect x="520" y="302" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.605"/>
-<text x="625" y="339" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+38.18%</text>
+<rect x="520" y="302" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.661"/>
+<text x="625" y="339" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+43.53%</text>
 <text x="32" y="414" font-family="Arial" font-size="12" fill="#64748b">Different entry sets and sizing: comparison is diagnostic, not causal attribution.</text>
 </svg>

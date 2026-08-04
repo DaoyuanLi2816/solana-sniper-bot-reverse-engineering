@@ -2,6 +2,7 @@ import pandas as pd
 
 from solana_sniper.position_backtest import (
     build_position_entries,
+    position_acceptance_decision,
     training_position_parameters,
     validate_position_entries,
 )
@@ -67,3 +68,23 @@ def test_position_entry_requires_same_slot_and_position_floor(tmp_path) -> None:
     assert a["entry_tx_index"] == 17
     assert a["actual_position_delta"] == 12
     assert not bool(b["covered"])
+
+
+def test_position_acceptance_requires_mean_median_and_solvency() -> None:
+    result = position_acceptance_decision(
+        [
+            {
+                "fee_scenario": "training_median_fee",
+                "net_mean_return": 0.08,
+                "net_median_return_unweighted": -0.05,
+                "insolvent_under_capital_model": True,
+            }
+        ]
+    )
+
+    assert not result["all_checks_passed"]
+    assert result["checks"] == {
+        "positive_population_weighted_mean": True,
+        "positive_unweighted_median": False,
+        "capital_path_solvent": False,
+    }

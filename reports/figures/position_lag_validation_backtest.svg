@@ -6,18 +6,18 @@
 <text x="625" y="96" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#334155">Position lag 112</text>
 <text x="32" y="160" font-family="Arial" font-size="14" fill="#334155">Gross</text>
 <rect x="255" y="126" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.800"/>
-<text x="360" y="163" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+40.38%</text>
-<rect x="520" y="126" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.390"/>
-<text x="625" y="163" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+12.81%</text>
+<text x="360" y="163" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+82.16%</text>
+<rect x="520" y="126" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.313"/>
+<text x="625" y="163" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+15.41%</text>
 <text x="32" y="248" font-family="Arial" font-size="14" fill="#334155">Median fees</text>
-<rect x="255" y="214" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.691"/>
-<text x="360" y="251" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+33.08%</text>
-<rect x="520" y="214" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.282"/>
-<text x="625" y="251" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+5.51%</text>
+<rect x="255" y="214" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.747"/>
+<text x="360" y="251" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+74.86%</text>
+<rect x="520" y="214" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.259"/>
+<text x="625" y="251" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+8.11%</text>
 <text x="32" y="336" font-family="Arial" font-size="14" fill="#334155">P90 fees</text>
-<rect x="255" y="302" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.523"/>
-<text x="360" y="339" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+21.76%</text>
-<rect x="520" y="302" width="210" height="58" rx="7" fill="#dc2626" fill-opacity="0.286"/>
-<text x="625" y="339" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">-5.81%</text>
+<rect x="255" y="302" width="210" height="58" rx="7" fill="#16a34a" fill-opacity="0.664"/>
+<text x="360" y="339" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">+63.54%</text>
+<rect x="520" y="302" width="210" height="58" rx="7" fill="#dc2626" fill-opacity="0.223"/>
+<text x="625" y="339" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#0f172a">-3.21%</text>
 <text x="32" y="414" font-family="Arial" font-size="12" fill="#64748b">Population-weighted validation means; final chronological holdout remains sealed.</text>
 </svg>

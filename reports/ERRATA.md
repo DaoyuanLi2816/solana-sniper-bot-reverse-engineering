@@ -110,3 +110,27 @@ reported descriptively as a realized deployment-transaction urgency proxy, but c
 is not the requested compute limit and the proxy must not be claimed as a classifier improvement.
 Detailed evidence is in [priority_fee_intensity.md](priority_fee_intensity.md); the final holdout
 remains sealed.
+
+## Revalidated transaction-position and competitor comparison after remediation
+
+The executable same-slot transaction-position diagnostic and target-wallet comparison were rerun
+twice with exact complete-dictionary matches on repaired strict-history dataset
+`57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f`. Entry-latency and
+entry-price decision times have zero token-level mismatch with the corrected classification table;
+UTC-hour, weekday, and strict-history violation counts are also zero.
+
+The training-only wallet median position remains 112 transactions after deployment. The corrected
+selector attempts 335 validation candidates and obtains 237 same-slot fills, for 57.03%
+population-weighted coverage. At the training-derived median round-trip fee, weighted mean return
+is +8.11%, but the unweighted median is -5.56%, hit rate is 43.53%, maximum drawdown is 91.96%,
+and the tight fixed-notional capital path briefly crosses zero. The position-lag candidate is
+therefore rejected under the predeclared requirement of positive mean, positive median, and
+solvency. The first-observed-trade zero-slot result remains an optimistic price proxy, not an
+executable claim.
+
+The target wallet remains profitable after its recorded gas and DEX fees in the same strictly
+pre-holdout window: mean ROI +10.71%, median ROI +3.05%, hit rate 56.63%, and realized drawdown
+6.89% across 1,372 actual buys. This is descriptive competitor evidence and does not transfer to
+the replica because entries, sizing, sampling, and execution differ. Detailed evidence is in
+[position_lag_validation_backtest.md](position_lag_validation_backtest.md) and
+[competitor_fee_pnl.md](competitor_fee_pnl.md); the final holdout remains sealed.
