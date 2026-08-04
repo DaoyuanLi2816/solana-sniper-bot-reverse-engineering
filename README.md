@@ -22,8 +22,23 @@ with a Sunday-zero convention, while positives used UTC and Monday-zero. This cl
 preprocessing invalidates classification and selection-backtest claims tied to dataset SHA-256
 `5fc74ffb...`. The repaired strict-history dataset is
 `57af874b0768eaf43c54f04d698cda9e3c3e1d9bf3e1a25c7c69910ecbe8817f`; its time-feature
-mismatch count is zero. The current sealed-development baseline is PR-AUC 0.06980, not 0.09933.
-See [reports/ERRATA.md](reports/ERRATA.md) before interpreting older reports.
+mismatch count is zero. The frozen raw signer-delta plus strict creator-history model has
+standard-validation PR-AUC 0.07028, precision 0.1203, recall 0.2011, and F1 0.1506 at its
+training-selected operating point. See [reports/ERRATA.md](reports/ERRATA.md) before interpreting
+older reports.
+
+## Frozen development result
+
+The final holdout remains sealed. On strictly pre-holdout outcomes, the optimistic
+first-observed-trade proxy passes the predeclared criterion only at requested delay zero. Once the
+entry is replaced by the target wallet's training-derived transaction position, the median-fee
+replica has mean return +8.11%, median return -5.56%, hit rate 43.53%, maximum drawdown 91.96%, and
+crosses zero under the fixed-capital model. That executable position-lag hypothesis is rejected;
+the raw zero-slot result is an upper bound, not deployable alpha.
+
+The target wallet itself records mean ROI +10.71%, median ROI +3.05%, hit rate 56.63%, and realized
+drawdown 6.89% on 1,372 strictly pre-holdout June buys. These post-deployment outcomes are used only
+for description, labeling, and backtesting.
 
 ## Layout
 
@@ -34,6 +49,11 @@ See [reports/ERRATA.md](reports/ERRATA.md) before interpreting older reports.
 - `reports/`: generated analysis, figures, and writeup material.
 - `src/solana_sniper/`: reusable data, validation, and modeling code.
 - `tests/`: leakage, split, schema, and metric checks.
+
+Competition data is not included in this repository and must not be redistributed. The executed
+[public reproduction notebook](notebooks/solana_sniper_reproduction.ipynb) contains code and
+aggregate outputs only. Follow [the notebook data-layout instructions](notebooks/README.md) after
+obtaining the source files through the official competition channel.
 
 ## Initial workflow
 
@@ -65,6 +85,19 @@ uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
 ```
+
+To rerun the public notebook after staging authorized data privately:
+
+```powershell
+uv run --with jupyter --with nbconvert jupyter nbconvert `
+  --to notebook --execute --inplace `
+  --ExecutePreprocessor.timeout=1800 `
+  notebooks/solana_sniper_reproduction.ipynb
+```
+
+Dependencies are locked in `uv.lock`. The executed notebook hash and publication state are tracked
+in `writeup/submission_manifest.json`; experiment parameters, artifact hashes, code versions, and
+negative results remain append-only in `experiments/manifest.jsonl`.
 
 Remote submission is a Kaggle Writeup rather than a leaderboard CSV. A final
 submission is allowed only after the public notebook, repository, figures, and

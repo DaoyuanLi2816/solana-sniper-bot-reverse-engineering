@@ -67,10 +67,11 @@ position-lag candidate is rejected; the raw zero-slot result is only an optimist
 - [x] Stale campaign status removed
 - [x] Cover image generated and checked
 - [x] Public reproducibility notebook created, run end to end, and audited for embedded data
-- [ ] Public repository created with lock, commands, hashes, and negative results
+- [x] Public repository created with lock, commands, hashes, and negative results
 - [ ] Kaggle Track, Media Gallery, Public Notebook, and Project Link attached
 - [ ] Initial Writeup submitted and remote ID, status, and URL recorded
 
 Corrected execution evidence is frozen in local commit `60bcae0`; the writeup and cover are frozen
-in `2c2823f`. The submission is not yet valid until all unchecked items are complete and Kaggle
-shows `Submitted`.
+in `2c2823f`; the executed notebook is frozen in `968b20b`. The public repository is
+`https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering`. The submission is not yet
+valid until all unchecked items are complete and Kaggle shows `Submitted`.

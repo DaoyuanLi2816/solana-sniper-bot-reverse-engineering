@@ -28,8 +28,14 @@
     "contains_local_user_path": false,
     "contains_embedded_competition_data": false,
     "final_holdout_evaluated": false,
-    "remote_url": null
+    "remote_url": "https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering/blob/main/notebooks/solana_sniper_reproduction.ipynb"
   },
-  "public_repository": null,
+  "public_repository": {
+    "url": "https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering",
+    "visibility": "PUBLIC",
+    "default_branch": "main",
+    "anonymous_readme_http_status": 200,
+    "anonymous_notebook_http_status": 200
+  },
   "kaggle_writeup": null
 }
