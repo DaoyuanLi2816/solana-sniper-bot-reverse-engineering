@@ -89,3 +89,6 @@ correction found before then can still be published.
 
 Live verification at 2026-08-11 02:09 UTC again showed `Submitted!`. The competition had 8 teams
 and 7 submitted projects, with no new competition discussion requiring a writeup correction.
+
+At 2026-08-11 11:13 UTC the writeup still showed `Submitted!`; the field had grown to 9 teams and
+8 submitted projects. Discussion remained unchanged, so no evidence-backed writeup edit was made.
