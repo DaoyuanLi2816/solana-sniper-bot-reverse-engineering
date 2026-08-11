@@ -92,3 +92,7 @@ and 7 submitted projects, with no new competition discussion requiring a writeup
 
 At 2026-08-11 11:13 UTC the writeup still showed `Submitted!`; the field had grown to 9 teams and
 8 submitted projects. Discussion remained unchanged, so no evidence-backed writeup edit was made.
+
+At 2026-08-11 20:25 UTC the writeup still showed `Submitted!`; the field had grown to 10 teams and
+9 submitted projects. The rendered writeup retains both public links and contains no superseded
+`5fc74...` hash. Discussion remained unchanged, so no evidence-backed writeup edit was made.
