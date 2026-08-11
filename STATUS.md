@@ -70,12 +70,22 @@ position-lag candidate is rejected; the raw zero-slot result is only an optimist
 - [x] Public reproducibility notebook created, run end to end, and audited for embedded data
 - [x] Public repository created with lock, commands, hashes, and negative results
 - [x] Kaggle public companion notebook version 1 completed and anonymously reachable
-- [ ] Kaggle Track, Media Gallery, Public Notebook, and Project Link attached
-- [ ] Initial Writeup submitted and remote ID, status, and URL recorded
+- [x] Kaggle Track attached (single track, auto-selected), repository and notebook links in the body
+- [x] Writeup submitted 2026-08-05 and verified as `Submitted` on Kaggle
 
 Corrected execution evidence is frozen in local commit `60bcae0`; the writeup and cover are frozen
 in `2c2823f`; the executed notebook is frozen in `968b20b`. The public repository is
-`https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering`. The submission is not yet
-valid until all unchecked items are complete and Kaggle shows `Submitted`. The Kaggle companion is
+`https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering`. The Kaggle companion is
 `https://www.kaggle.com/code/distiller/solana-sniper-leakage-audited-reproduction` and version 1 is
 `COMPLETE`.
+
+## Submission
+
+Submitted 2026-08-05 as
+[Zero-Block Solana Sniper: Selection Signal Is Not Execution Alpha](https://www.kaggle.com/competitions/solana-sniper-bot-reverse-engineering/writeups/new-writeup-1785834990646).
+Kaggle shows `Submitted`; the Writeups list shows the entry with its cover image under both
+Your Work and the public All section. It remains editable until 2026-08-14 21:00 UTC, so any
+correction found before then can still be published.
+
+Live verification at 2026-08-11 02:09 UTC again showed `Submitted!`. The competition had 8 teams
+and 7 submitted projects, with no new competition discussion requiring a writeup correction.

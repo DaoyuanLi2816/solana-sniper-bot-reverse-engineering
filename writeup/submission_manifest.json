@@ -9,7 +9,7 @@
       "amount_usd": 1000
     }
   },
-  "submission_status": "local_mvp_ready_for_publication_not_submitted",
+  "submission_status": "submitted",
   "writeup": {
     "path": "writeup/draft.md",
     "word_count": 1638,
@@ -57,5 +57,21 @@
     "anonymous_readme_http_status": 200,
     "anonymous_notebook_http_status": 200
   },
-  "kaggle_writeup": null
+  "kaggle_writeup": {
+    "url": "https://www.kaggle.com/competitions/solana-sniper-bot-reverse-engineering/writeups/new-writeup-1785834990646",
+    "state": "SUBMITTED",
+    "checklist": "5/5",
+    "submitted_utc": "2026-08-05T06:31:00Z",
+    "verified_utc": "2026-08-11T02:09:03Z",
+    "verification": "Writeup page shows 'Submitted!'; the competition Writeups list shows the entry under Your Work with a SUBMITTED badge and the cover image rendering, and it also appears in the public All section. Live audit found 8 teams, 7 submitted projects, about 4 days remaining, and no new competition discussion since the two threads already reviewed.",
+    "editable_until_utc": "2026-08-14T21:00:00Z",
+    "title": "Zero-Block Solana Sniper: Selection Signal Is Not Execution Alpha",
+    "subtitle": "A leak-free deployment-time selector for a zero-block Solana sniper, plus an execution audit that falsifies the profitable replica.",
+    "track": "Sniper Bot Reverse-Engineering & Replica (auto-selected, single track)",
+    "description_source": "writeup/draft.md, adapted; repo and Kaggle notebook links appended",
+    "description_saved_utc": "2026-08-05T06:12:00Z",
+    "card_image": "writeup/cover.png, uploaded manually by the user 2026-08-05",
+    "blocking_item": null,
+    "deadline_utc": "2026-08-14T21:00:00Z"
+  }
 }
