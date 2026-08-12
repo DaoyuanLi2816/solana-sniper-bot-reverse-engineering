@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-04 06:30 UTC
+Last verified: 2026-08-12 23:30 UTC
 
 ## Remote state
 
@@ -9,9 +9,9 @@ Last verified: 2026-08-04 06:30 UTC
 - Final deadline: 2026-08-14 21:00 UTC
 - Submission format: one Kaggle Writeup per team; it may be edited and re-saved before the
   deadline, but drafts and unsubmitted Writeups are not judged
-- Authenticated API team count: 4
-- Visible submitted projects: 4, all hidden until Hackathon close
-- Our account: no Writeup created or submitted yet
+- Authenticated API team count: 11
+- Submitted-project count: hidden before close and not reliably enumerable through the public API
+- Our account: entered; authenticated API returns our Writeup as `ContentState.PUBLISHED`
 - Discussion: two existing topics; no new technical or submission guidance
 
 The structured Hackathon Track API resolves the prize as one first-place award of USD 1,000
@@ -96,3 +96,9 @@ At 2026-08-11 11:13 UTC the writeup still showed `Submitted!`; the field had gro
 At 2026-08-11 20:25 UTC the writeup still showed `Submitted!`; the field had grown to 10 teams and
 9 submitted projects. The rendered writeup retains both public links and contains no superseded
 `5fc74...` hash. Discussion remained unchanged, so no evidence-backed writeup edit was made.
+
+At 2026-08-12 23:30 UTC, after the in-app browser login expired, the authenticated Kaggle v2 API
+independently confirmed that the account is entered and returned the expected submission as
+`ContentState.PUBLISHED` (HackathonWriteUp `82840`, WriteUp `108478`, team `16635086`, track
+`5836`, publish time `2026-08-05 06:30:53 UTC`). The field had grown to 11 teams and discussion
+still contained only the two previously reviewed topics. No evidence-backed writeup edit was made.
