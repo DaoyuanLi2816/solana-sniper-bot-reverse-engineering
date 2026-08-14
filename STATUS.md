@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-12 23:30 UTC
+Last verified: 2026-08-14 08:41 UTC
 
 ## Remote state
 
@@ -9,7 +9,7 @@ Last verified: 2026-08-12 23:30 UTC
 - Final deadline: 2026-08-14 21:00 UTC
 - Submission format: one Kaggle Writeup per team; it may be edited and re-saved before the
   deadline, but drafts and unsubmitted Writeups are not judged
-- Authenticated API team count: 11
+- Authenticated API team count: 18
 - Submitted-project count: hidden before close and not reliably enumerable through the public API
 - Our account: entered; authenticated API returns our Writeup as `ContentState.PUBLISHED`
 - Discussion: two existing topics; no new technical or submission guidance
@@ -102,3 +102,9 @@ independently confirmed that the account is entered and returned the expected su
 `ContentState.PUBLISHED` (HackathonWriteUp `82840`, WriteUp `108478`, team `16635086`, track
 `5836`, publish time `2026-08-05 06:30:53 UTC`). The field had grown to 11 teams and discussion
 still contained only the two previously reviewed topics. No evidence-backed writeup edit was made.
+
+At 2026-08-14 08:41 UTC, about 12 hours before the deadline, the authenticated API again returned
+the same Writeup as `ContentState.PUBLISHED`. The field had grown to 18 teams. Competition-page
+content hashes, data files, and discussion were unchanged; the public repository and notebook
+returned HTTP 200 and the notebook kernel remained `COMPLETE`. The final holdout remains sealed,
+and no evidence-backed writeup edit was made.
