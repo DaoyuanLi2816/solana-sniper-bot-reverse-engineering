@@ -78,5 +78,18 @@
     "card_image": "writeup/cover.png, uploaded manually by the user 2026-08-05",
     "blocking_item": null,
     "deadline_utc": "2026-08-14T21:00:00Z"
+  },
+  "post_deadline_audit": {
+    "verified_utc": "2026-08-14T23:44:45Z",
+    "deadline_passed": true,
+    "final_team_count": 29,
+    "published_writeup_count": 29,
+    "submission_content_state": "PUBLISHED",
+    "awarded_hackathon_track_prize_ids": [],
+    "result_status": "judging_pending_no_award_assigned",
+    "new_experiments_after_deadline": false,
+    "final_holdout_evaluated": false,
+    "summary_path": "reports/final_campaign_summary.md",
+    "summary_sha256": "5f0e38bf389c665880600d3f55e7446a52985a66346898a5e07bf70eaa1eab6b"
   }
 }
