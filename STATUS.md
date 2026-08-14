@@ -1,6 +1,6 @@
 # Campaign status
 
-Last verified: 2026-08-14 08:41 UTC
+Last verified: 2026-08-14 17:44 UTC
 
 ## Remote state
 
@@ -9,7 +9,7 @@ Last verified: 2026-08-14 08:41 UTC
 - Final deadline: 2026-08-14 21:00 UTC
 - Submission format: one Kaggle Writeup per team; it may be edited and re-saved before the
   deadline, but drafts and unsubmitted Writeups are not judged
-- Authenticated API team count: 18
+- Authenticated API team count: 23
 - Submitted-project count: hidden before close and not reliably enumerable through the public API
 - Our account: entered; authenticated API returns our Writeup as `ContentState.PUBLISHED`
 - Discussion: two existing topics; no new technical or submission guidance
@@ -108,3 +108,8 @@ the same Writeup as `ContentState.PUBLISHED`. The field had grown to 18 teams. C
 content hashes, data files, and discussion were unchanged; the public repository and notebook
 returned HTTP 200 and the notebook kernel remained `COMPLETE`. The final holdout remains sealed,
 and no evidence-backed writeup edit was made.
+
+At 2026-08-14 17:44 UTC, about three hours before the deadline, the authenticated API again
+returned the same Writeup as `ContentState.PUBLISHED`; the field had grown to 23 teams. The page,
+data, discussion, public-artifact, notebook, test, format, and Git audits all passed unchanged.
+This is the frozen final pre-deadline audit. No unreviewed model or Writeup changes are pending.
