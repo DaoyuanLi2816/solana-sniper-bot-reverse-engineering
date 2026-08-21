@@ -1,6 +1,7 @@
 # Final campaign summary
 
-Verified after the deadline at `2026-08-14T23:44:45Z`.
+Verified after the deadline at `2026-08-14T23:44:45Z`; result state refreshed at
+`2026-08-21T07:03:35Z`.
 
 ## Submission outcome
 
@@ -14,6 +15,9 @@ Verified after the deadline at `2026-08-14T23:44:45Z`.
 - Awarded track-prize IDs were empty for every Writeup at this audit. Judging is pending; no rank,
   prize, or winning claim is supported yet.
 - No experiment was started after the deadline, and the final chronological holdout remains sealed.
+- The `2026-08-21` public-result and mailbox refresh still found no winner, prize, compliance, or
+  additional-material notice. A public competitor audit is preserved in
+  `reports/postdeadline_competitor_audit.md`.
 
 ## Strongest supported result
 
@@ -84,4 +88,3 @@ zero-slot result is therefore retained only as an upper bound.
   `https://www.kaggle.com/code/distiller/solana-sniper-leakage-audited-reproduction`.
 - Public repository:
   `https://github.com/DaoyuanLi2816/solana-sniper-bot-reverse-engineering`.
-
